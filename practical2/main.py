@@ -6,7 +6,7 @@ import os
 import torch.nn as nn
 import torch.optim as optim
 from scipy.spatial.distance import cosine as cos_similarity
-#from skipgram import *
+from skipgram import *
 from collections import Counter
 
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     vocab, counter = create_vocab(docs)
 
-    SKIP = Skipgram()
+    SKIP = Skipgram(docs, vocab, counter, "mean")
 
     embeddings = train_skipgram(SKIP, docs)
 

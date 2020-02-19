@@ -78,11 +78,9 @@ class Skipgram(nn.Module):
         return onehot
 
 
-
-
-    def word_to_idx(self, word, vocab=self.vocab):
+    def word_to_idx(self, word):
         """Returns the index of the word (string) in the vocabulary (dict)"""
-        return vocab[word]
+        return self.vocab[word]
 
 
     def idx_to_word(idx, vocab):
