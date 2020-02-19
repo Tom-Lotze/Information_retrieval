@@ -13,7 +13,8 @@ from scipy.spatial.distance import cosine as cos_similarity
 
 
 class Skipgram(nn.Module):
-    def __init__(self, docs, vocab_size, embedding_dim=300, window_size=5):
+    def __init__(self, docs, vocab_size, aggregation_function,
+       embedding_dim=300, window_size=5):
         """
         Initialization of the skip gram model
         Arguments:
@@ -33,6 +34,8 @@ class Skipgram(nn.Module):
         self.vocab = 0
         self.vocab_size = 0      
         
+        self.aggr_function = aggregation_function
+
         self.target_fc = nn.Linear(self.vocab_size, self.embedding_dim)
         self.context_fc = nn.Linear(self.vocab_size, self.embedding_dim)
 
@@ -51,7 +54,6 @@ class Skipgram(nn.Module):
         cos = cos_similarity(target_E, context_E)
 
         return self.sigmoid(cos)
-
 
 
 
@@ -82,13 +84,20 @@ class Skipgram(nn.Module):
 
 
 
+
 def train_skipgram(docs):
     nr_epochs = 5
+
+    np.random.seed(42)
 
     SKIP = Skipgram()
     optimizer = optim.SparseAdam(SKIP.parameters())
 
     for epoch in nr_epochs:
+        optimizer.zero_grad()
+
+
+
 
 
 
