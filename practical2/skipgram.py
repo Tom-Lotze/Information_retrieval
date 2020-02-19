@@ -63,23 +63,24 @@ class Skipgram(nn.Module):
         # t_w = x[0, :].view(1, self.vocab_size)
 
         # target embedding (index the embeddings)
-        target_E = self.target_embedding(t_w)
+        target_E = self.target_embedding(torch.Tensor([t_w]).long())
 
         # positive embeddings
-        pos_E = self.context_embedding(pos_examples)
+        pos_E = self.context_embedding(torch.Tensor(pos_examples).long())
         # cosine similarity
         pos_score = self.sigmoid(cossim(target_E, pos_E))
 
         # loss of positive examples, should score 1,
         # loss is difference between 1 and actual score
-        pos_loss = 1 - pos_score
+        pos_loss = torch.sum(1 - pos_score, dim=0)
 
         # similar as above
-        neg_E = self.context_embedding(neg_examples)
+        # print(neg_examples)
+        neg_E = self.context_embedding(torch.Tensor(neg_examples).long())
         neg_score = self.sigmoid(cossim(target_E, neg_E))
 
         # neg loss is just cosine similarity
-        neg_loss = neg_score
+        neg_loss = torch.sum(neg_score)
 
         # context_E = self.context_fc(c_w)
 
@@ -161,8 +162,8 @@ def get_batches(model, docs):
             pos_indx = [model.word_to_idx(
                 c) for c in window if c != "NULL" and c in model.vocab.keys()]
 
-            neg_indx = [(model.word_to_idx(c)
-                         for c in model.neg_sample(model.counter, pdf))]
+            neg_indx = [model.word_to_idx(c)
+                        for c in model.neg_sample(model.counter, pdf)]
 
             # pos_tuples = [(model.word_to_onehot(target_word),
             #                model.word_to_onehot(c)) for c in window if c != "NULL" and c in model.vocab.keys()]
@@ -205,21 +206,21 @@ def train_skipgram(model, docs):
 
     np.random.seed(42)
 
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.SparseAdam(model.parameters())
     BCE_loss = nn.BCELoss()
     batches = get_batches(model, docs)
 
     for epoch in range(model.nr_epochs):
         print(f"Epoch nr {epoch}")
 
-        for step, (x, y) in enumerate(batches):
+        for step, X in enumerate(batches):
             optimizer.zero_grad()
 
-            predictions = model.forward(x)
+            loss = model.forward(X)
 
             # print(f'Predictions: {predictions}')
 
-            loss = BCE_loss(predictions, torch.Tensor(y))
+            # loss = BCE_loss(predictions, torch.Tensor(y))
 
             if step % 100 == 0:
                 print(f'Loss: {loss}')
