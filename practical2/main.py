@@ -34,9 +34,7 @@ def create_vocab(docs, threshold=50):
             i += 1
 
 
-    return vocabulary
-
-
+    return vocabulary, cntr
 
 
 
@@ -51,13 +49,13 @@ if __name__ == "__main__":
     docs = get_processed_docs()
 
     # print example document
-    print(docs["AP891026-0263"])
+    #print(docs["AP891026-0263"])
 
-    vocab = create_vocab(docs)
+    vocab, counter = create_vocab(docs)
 
-    print(len(vocab))
+    SKIP = Skipgram()
 
-    #embeddings = train_skipgram(docs)
+    embeddings = train_skipgram(SKIP, docs)
 
 
 

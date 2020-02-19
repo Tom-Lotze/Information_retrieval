@@ -13,7 +13,7 @@ from scipy.spatial.distance import cosine as cos_similarity
 
 
 class Skipgram(nn.Module):
-    def __init__(self, docs, vocab_size, aggregation_function,
+    def __init__(self, docs, vocab, counter, aggregation_function,
        embedding_dim=300, window_size=5):
         """
         Initialization of the skip gram model
@@ -29,10 +29,14 @@ class Skipgram(nn.Module):
         # set tunable parameters
         self.embedding_dim = embedding_dim
         self.window_size = 5
+        self.nr_epochs = 5
+        self.k = 10
+
+        self.counter = counter
         
         # vocab needs to be made and filtered on infrequent words
-        self.vocab = 0
-        self.vocab_size = 0      
+        self.vocab = vocab
+        self.vocab_size = len(vocab)
         
         self.aggr_function = aggregation_function
 
@@ -56,17 +60,23 @@ class Skipgram(nn.Module):
         return self.sigmoid(cos)
 
 
-
-    def word_embedding(self, word, vocab=self.vocab):
+    def word_embedding(self, word):
         # inference model that returns an embedding for the word
-        word_index = self.word_to_idx(word, vocab)
+        word_index = self.word_to_idx(word, self.vocab)
         return self.embedding(word_index)
-
 
 
     def doc_embedding(self, doc):
         #aggregate word embeddings
         pass
+
+    def word_to_onehot(self, word):
+        index = self.word_to_idx(word)
+        onehot = torch.zeros(self.vocab_size)
+        onehot[index] = 1
+
+        return onehot
+
 
 
 
@@ -83,18 +93,60 @@ class Skipgram(nn.Module):
         pass
 
 
+    def get_neg_sample_pdf(self, counter):
+        denominator = np.sum([np.pow(f, 3/4) for f in counter.values()])
+        
+        sampling_list = [np.pow(counter[word], 3/4) for word in self.vocab.keys()] / denominator
+
+        print(f"Sum of pdf {sum(sampling_list)}")
+
+        return sampling_list
 
 
-def train_skipgram(docs):
-    nr_epochs = 5
+    def neg_sample(self, counter):
+        return np.random.choice(self.vocab.keys(), p=get_neg_sample_pdf(counter), size=self.k)
 
-    np.random.seed(42)
 
-    SKIP = Skipgram()
-    optimizer = optim.SparseAdam(SKIP.parameters())
 
-    for epoch in nr_epochs:
-        optimizer.zero_grad()
+
+
+# training function for the embeddings
+def train_skipgram(model, docs):
+        
+        top = (model.window_size-1)/2
+
+        np.random.seed(42)
+
+        optimizer = optim.SparseAdam(SKIP.parameters())
+
+        for epoch in model.nr_epochs:
+            print(f"Epoch nr {epoch}")
+
+        
+            for doc in docs:
+                doc_len = len(doc)
+                padded_doc = ["NULL"]*top + doc + ["NULL"]*top
+                for i, target_word in enumerate(doc):
+                    i += top
+                    window = padded_doc[i-top:i]+padded_doc[i+1:i+top+1]
+                    pos_tuples = [(model.word_to_onehot(target_word), model.word_to_onehot(c)) for c in window]
+
+                    # negative samples
+                    neg_tuples = [(model.word_to_onehot(target_word), model.word_to_onehot(c)) for c in neg_sample(model.counter)]
+
+                    all_tuples = pos_tuples + neg_tuples
+                    all_labels = [1] * len(pos_tuples) + [0] * len(neg_tuples)
+
+                    for (tup, label) in zip(all_tuples, all_labels):
+                        optimizer.zero_grad()
+                        predictions = model.forward(tup)
+
+                        loss = nn.CrossEntropyLoss(predictions, label)
+
+                        loss.backward()
+                        optimizer.step()
+
+
 
 
 
