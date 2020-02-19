@@ -8,7 +8,7 @@ import pickle as pkl
 import os
 import torch.nn as nn
 import torch.optim as optim
-
+from scipy.spatial.distance import cosine as cos_similarity
 
 
 
@@ -28,27 +28,37 @@ class Skipgram(nn.Module):
         # set tunable parameters
         self.embedding_dim = embedding_dim
         self.window_size = 5
-        self.vocab_size = 0        
         
-        self.fc1 = nn.Linear(self.vocab_size, self.embedding_dim)
-        self.fc2 = nn.Linear(self.embedding_dim, self.vocab_size)
+        # vocab needs to be made and filtered on infrequent words
+        self.vocab = 0
+        self.vocab_size = 0      
+        
+        self.target_fc = nn.Linear(self.vocab_size, self.embedding_dim)
+        self.context_fc = nn.Linear(self.vocab_size, self.embedding_dim)
 
-        self.embedding = nn.Embedding(self.vocab_size, self.output_dim)
+        self.target_embedding = nn.Embedding(self.vocab_size, self.output_dim)
+        self.context_embedding = nn.Embedding(self.vocab_size, self.output_dim)
+
+        self.sigmoid = nn.Sigmoid()
 
 
     def forward(self, x):
-        """Perform a forward pass on the one-hot encoding of a word"""
-        for l in self.layers():
-            x = l(x)
+        """Perform a forward pass on the tuple of two one hot encodings"""
+        (target_word, context_word) = x
+        target_E = self.target_fc(target_word)
+        context_E = self.context_fc(context_word)
 
-        return x
+        cos = cos_similarity(target_E, context_E)
+
+        return self.sigmoid(cos)
 
 
 
-    def word_embedding(self, word):
+
+    def word_embedding(self, word, vocab=self.vocab):
         # inference model that returns an embedding for the word
-        pass
-        #nn.Embedding
+        word_index = self.word_to_idx(word, vocab)
+        return self.embedding(word_index)
 
 
 
@@ -58,27 +68,31 @@ class Skipgram(nn.Module):
 
 
 
+    def word_to_idx(self, word, vocab=self.vocab):
+        """Returns the index of the word (string) in the vocabulary (dict)"""
+        return vocab[word]
+
+
+    def idx_to_word(idx, vocab):
+        """
+        Returns the word (string) corresponding to the index in the vocabulary
+        (dict)
+        """
+        pass
+
+
+
 def train_skipgram(docs):
+    nr_epochs = 5
 
     SKIP = Skipgram()
     optimizer = optim.SparseAdam(SKIP.parameters())
 
+    for epoch in nr_epochs:
 
 
 
-if __name__ == "__main__":
-    np.random_seed = 42
-    docs_path = "./processed_docs.pkl"
-    assert os.path.exists(docs_path), "Processed docs could not be found in this\
-        directory. They will be processed now"
 
-    # docs is a dictionary with doc-ids as keys, value: lists of preprocessed words
-    docs = get_processed_docs()
-
-    # print example document
-    # print(docs["AP891026-0263"])
-
-    embeddings = train_skipgram(docs)
     
 
 
