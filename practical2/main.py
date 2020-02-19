@@ -1,20 +1,13 @@
 import numpy as np
 import torch
 from read_ap import *
-import pickle as pkl 
+import pickle as pkl
 import os
 import torch.nn as nn
 import torch.optim as optim
 from scipy.spatial.distance import cosine as cos_similarity
 from skipgram import *
 from collections import Counter
-
-
-
-
-
-
-
 
 
 def create_vocab(docs, threshold=50):
@@ -33,10 +26,7 @@ def create_vocab(docs, threshold=50):
             vocabulary[element] = i
             i += 1
 
-
     return vocabulary, cntr
-
-
 
 
 if __name__ == "__main__":
@@ -48,15 +38,16 @@ if __name__ == "__main__":
     # docs is a dictionary with doc-ids as keys, value: lists of preprocessed words
     docs = get_processed_docs()
 
+    docs_test = dict()
+
+    for doc_id in list(docs.keys()):
+        docs_test[doc_id] = docs[doc_id]
+
     # print example document
-    #print(docs["AP891026-0263"])
+    # print(docs["AP891026-0263"])
 
-    vocab, counter = create_vocab(docs)
+    vocab, counter = create_vocab(docs_test)
 
-    SKIP = Skipgram(docs, vocab, counter, "mean")
+    SKIP = Skipgram(docs_test, vocab, counter, "mean")
 
-    embeddings = train_skipgram(SKIP, docs)
-
-
-
-
+    embeddings = train_skipgram(SKIP, docs_test)

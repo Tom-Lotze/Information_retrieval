@@ -1,4 +1,3 @@
-
 # This file implements a skip gram model (word2vec) using Pytorch
 
 import numpy as np
@@ -8,7 +7,7 @@ import pickle as pkl
 import os
 import torch.nn as nn
 import torch.optim as optim
-from scipy.spatial.distance import cosine as cos_similarity
+# from scipy.spatial.distance import cosine as cos_similarity
 
 
 class Skipgram(nn.Module):
@@ -42,20 +41,56 @@ class Skipgram(nn.Module):
         self.target_fc = nn.Linear(self.vocab_size, self.embedding_dim)
         self.context_fc = nn.Linear(self.vocab_size, self.embedding_dim)
 
-        self.target_embedding = nn.Embedding(self.vocab_size, embedding_dim)
-        self.context_embedding = nn.Embedding(self.vocab_size, embedding_dim)
+        self.target_embedding = nn.Embedding(
+            self.vocab_size, embedding_dim, sparse=True)
+        self.context_embedding = nn.Embedding(
+            self.vocab_size, embedding_dim, sparse=True)
 
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         """Perform a forward pass on the tuple of two one hot encodings"""
-        (target_word, context_word) = x
-        target_E = self.target_fc(target_word)
-        context_E = self.context_fc(context_word)
 
-        cos = cos_similarity(target_E, context_E)
+        cossim = nn.CosineSimilarity(dim=1)
 
-        return self.sigmoid(cos)
+        # target index
+        t_w = x[0]
+
+        # indices for positive and negative examples
+        pos_examples = x[1]
+        neg_examples = x[2]
+
+        # t_w = x[0, :].view(1, self.vocab_size)
+
+        # target embedding (index the embeddings)
+        target_E = self.target_embedding(t_w)
+
+        # positive embeddings
+        pos_E = self.context_embedding(pos_examples)
+        # cosine similarity
+        pos_score = self.sigmoid(cossim(target_E, pos_E))
+
+        # loss of positive examples, should score 1,
+        # loss is difference between 1 and actual score
+        pos_loss = 1 - pos_score
+
+        # similar as above
+        neg_E = self.context_embedding(neg_examples)
+        neg_score = self.sigmoid(cossim(target_E, neg_E))
+
+        # neg loss is just cosine similarity
+        neg_loss = neg_score
+
+        # context_E = self.context_fc(c_w)
+
+        # print(f'target_e is {target_E.size()}')
+        # print(f'cotext_e is {context_E.size()}')
+
+        # cos = cossim(target_E, context_E)
+
+        # return self.sigmoid(cos)
+
+        return pos_loss + neg_loss
 
     def word_embedding(self, word):
         # inference model that returns an embedding for the word
@@ -91,48 +126,103 @@ class Skipgram(nn.Module):
         sampling_list = [np.power(counter[word], 3/4)
                          for word in self.vocab.keys()] / denominator
 
-        print(f"Sum of pdf {sum(sampling_list)}")
-
         return sampling_list
 
-    def neg_sample(self, counter):
-        return np.random.choice(list(self.vocab.keys()), p=self.get_neg_sample_pdf(counter), size=self.k)
+    def neg_sample(self, counter, pdf):
+        return np.random.choice(list(self.vocab.keys()), p=pdf, size=self.k)
 
 
-# training function for the embeddings
-def train_skipgram(model, docs):
+def get_batches(model, docs):
+    batches = []
+
+    # denominator = np.sum([np.power(model.counter[w], 3/4)
+    # for w in model.vocab.keys()])
+    pdf = model.get_neg_sample_pdf(model.counter)
 
     top = int(model.window_size/2)
 
+    for j, doc in enumerate(docs.values()):
+        if j % 10 == 0:
+            print(f'{j} docs processed')
+
+        padded_doc = ["NULL"] * top + doc + ["NULL"] * top
+
+        for i, target_word in enumerate(doc):
+
+            if target_word not in model.vocab.keys():
+                continue
+
+            i += top
+
+            window = padded_doc[i-top:i]+padded_doc[i+1:i+top+1]
+
+            # instead of returning matrices of one hots, make batches of indices
+            t_indx = model.word_to_idx(target_word)
+            pos_indx = [model.word_to_idx(
+                c) for c in window if c != "NULL" and c in model.vocab.keys()]
+
+            neg_indx = [(model.word_to_idx(c)
+                         for c in model.neg_sample(model.counter, pdf))]
+
+            # pos_tuples = [(model.word_to_onehot(target_word),
+            #                model.word_to_onehot(c)) for c in window if c != "NULL" and c in model.vocab.keys()]
+            # negative samples
+            # neg_tuples=[(model.word_to_onehot(target_word), model.word_to_onehot(
+            # c)) for c in model.neg_sample(model.counter, pdf)]
+
+            # all_tuples = pos_tuples + neg_tuples
+            # all_labels = [1] * len(pos_tuples) + [0] * len(neg_tuples)
+
+            # batch_size=len(pos_tuples) + model.k
+
+            # batch_x=torch.Tensor(batch_size + 1, model.vocab_size)
+
+            # batch_pos=torch.Tensor(len(pos_tuples), model.vocab_size)
+            # batch_neg=torch.Tensor(len(neg_tuples), model.vocab_size)
+
+            # for i, tup in enumerate(pos_tuples):
+            #     batch_pos[i, :]=tup[1]
+
+            # for i, tup in enumerate(neg_tuples):
+            #     batch_neg[i, :]=tup[1]
+
+            # batch_target=model.word_to_onehot(target_word)
+
+            # batch_labels = torch.zeros(batch_size)
+            # batch_labels[:len(pos_tuples)] = 1
+
+            # for (tup, label) in zip(all_tuples, all_labels):
+            # batches.append([batch_target, batch_pos, batch_neg])
+            batches.append([t_indx, pos_indx, neg_indx])
+
+    return batches
+
+
+# training function for the embeddings
+
+
+def train_skipgram(model, docs):
+
     np.random.seed(42)
 
-    optimizer = optim.SparseAdam(model.parameters())
+    optimizer = optim.Adam(model.parameters())
+    BCE_loss = nn.BCELoss()
+    batches = get_batches(model, docs)
 
     for epoch in range(model.nr_epochs):
         print(f"Epoch nr {epoch}")
 
-        for doc in docs.values():
-            padded_doc = ["NULL"] * top + doc + ["NULL"] * top
-            for i, target_word in enumerate(doc):
-                i += top
+        for step, (x, y) in enumerate(batches):
+            optimizer.zero_grad()
 
-                window = padded_doc[i-top:i]+padded_doc[i+1:i+top+1]
+            predictions = model.forward(x)
 
-                pos_tuples = [(model.word_to_onehot(target_word),
-                               model.word_to_onehot(c)) for c in window if c != "NULL"]
+            # print(f'Predictions: {predictions}')
 
-                # negative samples
-                neg_tuples = [(model.word_to_onehot(target_word), model.word_to_onehot(
-                    c)) for c in model.neg_sample(model.counter)]
+            loss = BCE_loss(predictions, torch.Tensor(y))
 
-                all_tuples = pos_tuples + neg_tuples
-                all_labels = [1] * len(pos_tuples) + [0] * len(neg_tuples)
+            if step % 100 == 0:
+                print(f'Loss: {loss}')
 
-                for (tup, label) in zip(all_tuples, all_labels):
-                    optimizer.zero_grad()
-                    predictions = model.forward(tup)
-
-                    loss = nn.CrossEntropyLoss(predictions, label)
-
-                    loss.backward()
-                    optimizer.step()
+            loss.backward()
+            optimizer.step()
