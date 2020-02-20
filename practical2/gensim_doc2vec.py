@@ -10,14 +10,15 @@ from time import time
 def training(docs):
 
     begin = time()
-
+    
+    model_name = f"./gensim_{len(docs)}.model"
     
     model = Doc2Vec(vector_size=300, window=2, min_count=50, workers=4, epochs=10, seed=42)
 
     print(f"Model initialized in {time()-begin:.2f} seconds\n")
 
     try: 
-        model.load("./gensim.model")
+        model = Doc2Vec.load(model_name)
         print("Model loaded from memory")
     except:
         print("No saved model found in this folder. Training now")
@@ -30,10 +31,9 @@ def training(docs):
 
         print(f"Model is trained in {time()-begin:.2f} seconds\n")
 
-        model.save("./gensim.model")
+        model.save(model_name)
 
-    #vector = model.infer_vector(['only', 'you', 'can', 'prevent', 'forest', 'fires'])
-    #print(f"Inferred vector for testing: {vector}")
+        print(f"Model is saved as {model_name}")
 
     return model
 
@@ -64,7 +64,6 @@ def rank(model, docs, query):
 if __name__ == "__main__":
 
     # retrieve docs as a list
-    try: model.
     docs = list(get_processed_docs().values())
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(docs)]
 
@@ -76,11 +75,15 @@ if __name__ == "__main__":
 
     query = process_text(query_raw)
 
-    print(f"Sanity check:\n{sanity_check(model, documents)}\n")
+    # sanity check takes a LONG time on full sized doc collection (>1h)
+    #print(f"Sanity check:\n{sanity_check(model, documents)}\n")
 
     ranking = rank(model, documents, query)
 
-    print(ranking)
+    print(f"{ranking}\n")
+
+    for i in range(10):
+        print(docs[ranking[i][0]])
 
 
 
