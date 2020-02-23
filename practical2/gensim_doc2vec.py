@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     ranking = rank(model, documents, query)
 
-    print(f"{ranking}\n")
+    #print(f"{ranking}\n")
 
     for i in range(10):
         print(docs[ranking[i][0]])
