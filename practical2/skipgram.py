@@ -28,7 +28,7 @@ class Skipgram(nn.Module):
         # set tunable parameters
         self.embedding_dim = embedding_dim
         self.window_size = 5
-        self.nr_epochs = 20
+        self.nr_epochs = 2000
         self.k = 10
 
         self.counter = counter
@@ -45,52 +45,34 @@ class Skipgram(nn.Module):
             self.vocab_size, embedding_dim, sparse=True)
 
         nn.init.uniform_(self.target_embedding.weight, -0.1, 0.1)
-        nn.init.uniform_(self.context_embedding.weight, -0.1, 0.1)
+        nn.init.uniform_(self.context_embedding.weight, 0, 0)
 
         self.sigmoid = nn.Sigmoid()
 
-    def forward(self, x):
+    def forward(self, pos_u, pos_v, neg_v):
         """Perform a forward pass on the tuple of two one hot encodings"""
 
         # indices for positive and negative examples
-        pos_examples = x[1]
-        neg_examples = x[2]
-
-        batch_size = len(pos_examples) + len(neg_examples)
-
-        pos_t = [x[0]] * len(pos_examples)
-        neg_t = [x[0]] * len(neg_examples)
+        batch_size = len(pos_u)
+        pos_u = Variable(torch.Tensor(pos_u).long())
+        pos_v = Variable(torch.Tensor(pos_v).long())
+        neg_v = Variable(torch.Tensor(neg_v).long())
 
         # target embedding (index the embeddings)
-        pos_t_E = self.target_embedding(Variable(torch.Tensor(pos_t).long()))
+        pos_t_E = self.target_embedding(pos_u)
 
         # positive embeddings
-        pos_E = self.context_embedding(Variable(
-            torch.Tensor(pos_examples).long()))
+        pos_E = self.context_embedding(pos_v)
 
-        pos_score = torch.sum(torch.mul(pos_t_E, pos_E), dim=1)
-        pos_score = torch.log(self.sigmoid(pos_score)).squeeze()
+        pos_score = torch.sum(torch.mul(pos_t_E, pos_E).squeeze(), dim=1)
+        pos_score = torch.log(self.sigmoid(pos_score))
 
-        # pos_loss = Variable(torch.sum(pos_score, dim=1),
-        # requires_grad=True).squeeze()
+        neg_E = self.context_embedding(neg_v)
 
-        neg_t_E = self.target_embedding(Variable(torch.Tensor(neg_t).long()))
+        neg_score = torch.bmm(neg_E, pos_t_E.unsqueeze(2))
+        neg_score = torch.sum(neg_score, dim=1)
 
-        # similar as above
-        # print(neg_examples)
-        neg_E = self.context_embedding(
-            Variable(torch.Tensor(neg_examples).long()))
-
-        # neg_E = neg_E.view(neg_E.shape[0], 1, self.embedding_dim)
-        # neg_score = self.sigmoid(cossim(target_E, neg_E))
-        # print(f'neg_E size: {neg_E.size()}, target_E size :{target_E.size()}')
-        neg_score = torch.sum(torch.bmm(neg_E,
-                                        neg_t_E.unsqueeze(2)).squeeze(), dim=1)
-
-        neg_score = torch.log(self.sigmoid(-neg_score)).squeeze
-
-        # neg loss is just cosine similarity
-        # neg_loss = Variable(torch.sum(neg_score, dim=0), requires_grad=True)
+        neg_score = torch.log(self.sigmoid(-neg_score)).squeeze()
 
         return -(pos_score.sum() + neg_score.sum()) / batch_size
 
@@ -130,22 +112,23 @@ class Skipgram(nn.Module):
 
         return sampling_list
 
-    def neg_sample(self, counter, pdf):
-        return np.random.choice(list(self.vocab.keys()), p=pdf, size=self.k)
+    def neg_sample(self, counter, pdf, k):
+        return np.random.choice(list(self.vocab.keys()), p=pdf, size=k)
 
 
-def get_batches(model, docs):
-    batches = []
+def get_batches(model, docs, batch_size):
+    ''' generate batches '''
 
-    # denominator = np.sum([np.power(model.counter[w], 3/4)
-    # for w in model.vocab.keys()])
     pdf = model.get_neg_sample_pdf(model.counter)
 
     top = int(model.window_size/2)
 
+    pos_batch = []
+    neg_batch = []
+
     for j, doc in enumerate(docs.values()):
-        if j % 10 == 0:
-            print(f'{j} docs processed')
+        # if j % 10 == 0:
+        # print(f'{j} docs processed')
 
         padded_doc = ["NULL"] * top + doc + ["NULL"] * top
 
@@ -158,21 +141,25 @@ def get_batches(model, docs):
 
             window = padded_doc[i-top: i]+padded_doc[i+1: i+top+1]
 
-            # instead of returning matrices of one hots, make batches
-            # of indices
-            t_indx = model.word_to_idx(target_word)
-            pos_indx = [model.word_to_idx(
-                c) for c in window if c != "NULL" and c in model.vocab.keys()]
+            pos_pairs = [(model.word_to_idx(target_word), model.word_to_idx(
+                c)) for c in window if c != "NULL" and c in model.vocab.keys()]
 
-            neg_indx = [model.word_to_idx(c)
-                        for c in model.neg_sample(model.counter, pdf)]
+            pos_batch += pos_pairs
 
-            batches.append([t_indx, pos_indx, neg_indx])
+            if len(pos_batch) == batch_size:
+                for pos_x in pos_batch:
+                    neg_batch.append([model.word_to_idx(c)
+                                      for c in model.neg_sample(model.counter,
+                                                                pdf, model.k)])
+                yield (pos_batch, neg_batch)
+                neg_batch = []
+                pos_batch = []
+                pos_pairs = []
+                # batches.append([t_indx, pos_indx, neg_indx])
 
-    return batches
+                # return batches
 
-
-# training function for the embeddings
+                # training function for the embeddings
 
 
 def train_skipgram(model, docs):
@@ -181,20 +168,21 @@ def train_skipgram(model, docs):
 
     optimizer = optim.SparseAdam(model.parameters())
 
-    BCE_loss = nn.BCELoss()
-    batches = get_batches(model, docs)
+    # batches = get_batches(model, docs)
+
+    batch_size = 50
 
     for epoch in range(model.nr_epochs):
         print(f"Epoch nr {epoch}")
 
-        for step, X in enumerate(batches):
+        for step, (pos_batch, neg_batch) in enumerate(get_batches(model, docs, batch_size)):
             optimizer.zero_grad()
 
-            loss = model.forward(X)
+            pos_u = [x[0] for x in pos_batch]
+            pos_v = [x[1] for x in pos_batch]
+            neg_v = neg_batch
 
-            # print(f'Predictions: {predictions}')
-
-            # loss = BCE_loss(predictions, torch.Tensor(y))
+            loss = model.forward(pos_u, pos_v, neg_v)
 
             if step % 1000 == 0:
                 # print(f'Loss: {loss}')

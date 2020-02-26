@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     docs_test = dict()
 
-    for doc_id in list(docs.keys())[:80]:
+    for doc_id in list(docs.keys())[:1000]:
         docs_test[doc_id] = docs[doc_id]
 
     # print example document
