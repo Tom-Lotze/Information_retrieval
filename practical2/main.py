@@ -5,7 +5,6 @@ import pickle as pkl
 import os
 import torch.nn as nn
 import torch.optim as optim
-from scipy.spatial.distance import cosine as cos_similarity
 from skipgram import *
 from collections import Counter
 
@@ -35,12 +34,13 @@ if __name__ == "__main__":
     assert os.path.exists(docs_path), "Processed docs could not be found in this\
         directory. They will be processed now"
 
-    # docs is a dictionary with doc-ids as keys, value: lists of preprocessed words
+    # docs is a dictionary with doc-ids as keys, value: lists of
+    # preprocessed words
     docs = get_processed_docs()
 
     docs_test = dict()
 
-    for doc_id in list(docs.keys())[:50]:
+    for doc_id in list(docs.keys())[:80]:
         docs_test[doc_id] = docs[doc_id]
 
     # print example document
