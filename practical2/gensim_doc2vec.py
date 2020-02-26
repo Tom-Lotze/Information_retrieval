@@ -5,15 +5,21 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from read_ap import process_text, get_processed_docs
 from collections import Counter
 from time import time
+import read_ap
+from tqdm import tqdm
+import pytrec_eval
+import json
 
 
 def training(docs):
 
     begin = time()
     
-    model_name = f"./gensim_{len(docs)}.model"
+    model_name = f"gensim_{len(docs)}.model"
+
+    print(f"model name: {model_name}")
     
-    model = Doc2Vec(vector_size=300, window=2, min_count=50, workers=4, epochs=10, seed=42)
+    model = Doc2Vec(vector_size=300, window=2, min_count=50, workers=4, epochs=2, seed=42)
 
     print(f"Model initialized in {time()-begin:.2f} seconds\n")
 
@@ -52,38 +58,72 @@ def sanity_check(model, docs):
     return cntr
 
 
-def rank(model, docs, query):
+def rank(model, docs, query_raw):
+    query = process_text(query_raw)
     query_vector = model.infer_vector(query)
 
-    ranking = model.docvecs.most_similar([query_vector])
+    ranking = model.docvecs.most_similar([query_vector], topn=len(model.docvecs))
 
     return ranking
+
+def benchmark(model, docs, idx2key):
+    qrels, queries = read_ap.read_qrels()
+
+    #print(f"qrels {qrels}")
+
+    overall_ser = {}
+
+    print("Running GENSIM Benchmark")
+    # collect results
+    for qid in tqdm(qrels): 
+        query_text = queries[qid]
+        #print(f"query_text {query_text}")
+        results = rank(model, docs, query_text) 
+        overall_ser[qid] = dict([(idx2key[idx], score) for idx, score in results])
+
+    #print(overall_ser)
+    
+    # run evaluation with `qrels` as the ground truth relevance judgements
+    # here, we are measuring MAP and NDCG, but this can be changed to 
+    # whatever you prefer
+
+    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
+    metrics = evaluator.evaluate(overall_ser)
+
+    # dump this to JSON
+    # *Not* Optional - This is submitted in the assignment!
+    with open("gensim.json", "w") as writer:
+        json.dump(metrics, writer, indent=1)
 
 
 
 if __name__ == "__main__":
 
     # retrieve docs as a list
-    docs = list(get_processed_docs().values())
+    processed_docs = get_processed_docs()
+    docs = processed_docs.values()
+    doc_keys = processed_docs.keys()
+    idx2key = {i: key for i, key in enumerate(doc_keys)}
+
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(docs)]
 
     print(f"Docs are loaded. {len(docs)} in total\n")
 
     model = training(documents)
 
-    query_raw = "Bloomberg did not perform well during the Democratic election debate"
+    benchmark(model, documents, idx2key)
 
-    query = process_text(query_raw)
 
     # sanity check takes a LONG time on full sized doc collection (>1h)
     #print(f"Sanity check:\n{sanity_check(model, documents)}\n")
-
-    ranking = rank(model, documents, query)
-
-    #print(f"{ranking}\n")
-
-    for i in range(10):
-        print(docs[ranking[i][0]])
+    
+    # ranking on example query
+        # query_raw = "Bloomberg did not perform well during the Democratic election debate"
+        # ranking = rank(model, documents, query_raw)
+        # print(f"ranking: {ranking}\n")
+        # for i in range(5):
+        #     print(" ".join(processed_docs[idx2key[ranking[i][0]]]))
+        #     print("\n\n")
 
 
 
