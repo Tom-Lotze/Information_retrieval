@@ -9,7 +9,7 @@ from skipgram import *
 from collections import Counter
 
 
-def create_vocab(docs, threshold=50):
+def create_vocab(docs, threshold=120):
     cntr = Counter()
 
     for (doc_id, doc) in docs.items():
@@ -37,11 +37,11 @@ if __name__ == "__main__":
     # docs is a dictionary with doc-ids as keys, value: lists of
     # preprocessed words
     docs = get_processed_docs()
+    docs_test = docs
+    # docs_test = dict()
 
-    docs_test = dict()
-
-    for doc_id in list(docs.keys())[:1000]:
-        docs_test[doc_id] = docs[doc_id]
+    # for doc_id in list(docs.keys())[:1000]:
+    # docs_test[doc_id] = docs[doc_id]
 
     # print example document
     # print(docs["AP891026-0263"])

@@ -1,5 +1,5 @@
 # This file implements a skip gram model (word2vec) using Pytorch
-
+import os
 import numpy as np
 import torch
 from read_ap import *
@@ -8,6 +8,7 @@ import os
 import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
+from collections import Counter
 # from scipy.spatial.distance import cosine as cos_similarity
 
 
@@ -35,6 +36,7 @@ class Skipgram(nn.Module):
 
         # vocab needs to be made and filtered on infrequent words
         self.vocab = vocab
+        self.inv_vocab = {v: k for k, v in vocab.items()}
         self.vocab_size = len(vocab)
 
         self.aggr_function = aggregation_function
@@ -53,10 +55,12 @@ class Skipgram(nn.Module):
         """Perform a forward pass on the tuple of two one hot encodings"""
 
         # indices for positive and negative examples
-        batch_size = len(pos_u)
+        # batch_size = len(pos_u)
         pos_u = Variable(torch.Tensor(pos_u).long())
         pos_v = Variable(torch.Tensor(pos_v).long())
         neg_v = Variable(torch.Tensor(neg_v).long())
+
+        batch_size = len(pos_u) + len(pos_u) * self.k
 
         # target embedding (index the embeddings)
         pos_t_E = self.target_embedding(pos_u)
@@ -79,29 +83,18 @@ class Skipgram(nn.Module):
     def word_embedding(self, word):
         # inference model that returns an embedding for the word
         word_index = self.word_to_idx(word, self.vocab)
-        return self.embedding(word_index)
-
-    def doc_embedding(self, doc):
-        # aggregate word embeddings
-        pass
-
-    def word_to_onehot(self, word):
-        index = self.word_to_idx(word)
-        onehot = torch.zeros(self.vocab_size)
-        onehot[index] = 1
-
-        return onehot
+        return self.target_embedding(word_index)
 
     def word_to_idx(self, word):
         """Returns the index of the word (string) in the vocabulary (dict)"""
         return self.vocab[word]
 
-    def idx_to_word(idx, vocab):
+    def idx_to_word(self, idx, inv_vocab):
         """
         Returns the word (string) corresponding to the index in the vocabulary
         (dict)
         """
-        pass
+        return inv_vocab[idx]
 
     def get_neg_sample_pdf(self, counter):
         denominator = np.sum([np.power(counter[w], 3/4)
@@ -115,67 +108,84 @@ class Skipgram(nn.Module):
     def neg_sample(self, counter, pdf, k):
         return np.random.choice(list(self.vocab.keys()), p=pdf, size=k)
 
+    def most_similar(self, word_idx):
+        cossim = nn.CosineSimilarity()
+        scores = Counter()
+        for w, i in self.vocab.items():
+            if i != word_idx:
+                sim = cossim(self.target_embedding(
+                    word_idx), self.target_embedding(torch.Tensor([i]).long()))
+                scores[w] = sim.item()
+        return scores.most_common(10)
 
-def get_batches(model, docs, batch_size):
+
+def get_batches(model, docs, batch_size, pdf):
     ''' generate batches '''
-
-    pdf = model.get_neg_sample_pdf(model.counter)
 
     top = int(model.window_size/2)
 
     pos_batch = []
     neg_batch = []
 
-    for j, doc in enumerate(docs.values()):
-        # if j % 10 == 0:
-        # print(f'{j} docs processed')
+    docs_list = np.array(list(docs.values()))
+    np.random.shuffle(docs_list)
 
+    for j, doc in enumerate(docs_list):
+        # pad the doc for edge cases
         padded_doc = ["NULL"] * top + doc + ["NULL"] * top
 
+        print(f'Doc: {j}')
+
+        # loop over words in doc
         for i, target_word in enumerate(doc):
 
+            # if target word not in vocab we skip it
             if target_word not in model.vocab.keys():
                 continue
 
             i += top
 
+            # define the window
             window = padded_doc[i-top: i]+padded_doc[i+1: i+top+1]
 
+            # positive training pairs
             pos_pairs = [(model.word_to_idx(target_word), model.word_to_idx(
                 c)) for c in window if c != "NULL" and c in model.vocab.keys()]
 
+            # add to batch
             pos_batch += pos_pairs
 
-            if len(pos_batch) == batch_size:
+            # if larger than batch size, sample negative
+            if len(pos_batch) > batch_size:  # FIX
                 for pos_x in pos_batch:
                     neg_batch.append([model.word_to_idx(c)
                                       for c in model.neg_sample(model.counter,
                                                                 pdf, model.k)])
                 yield (pos_batch, neg_batch)
-                neg_batch = []
-                pos_batch = []
                 pos_pairs = []
-                # batches.append([t_indx, pos_indx, neg_indx])
-
-                # return batches
-
-                # training function for the embeddings
 
 
 def train_skipgram(model, docs):
-
+    # numpy seed
+    # set torch seed
+    torch.manual_seed(42)
     np.random.seed(42)
 
     optimizer = optim.SparseAdam(model.parameters())
 
     # batches = get_batches(model, docs)
 
-    batch_size = 50
+    batch_size = 256
+
+    pdf = model.get_neg_sample_pdf(model.counter)
 
     for epoch in range(model.nr_epochs):
         print(f"Epoch nr {epoch}")
 
-        for step, (pos_batch, neg_batch) in enumerate(get_batches(model, docs, batch_size)):
+        for step, (pos_batch, neg_batch) in enumerate(get_batches(model, docs,
+                                                                  batch_size,
+                                                                  pdf)):
+            # print(pos_batch, neg_batch)
             optimizer.zero_grad()
 
             pos_u = [x[0] for x in pos_batch]
@@ -184,9 +194,14 @@ def train_skipgram(model, docs):
 
             loss = model.forward(pos_u, pos_v, neg_v)
 
-            if step % 1000 == 0:
-                # print(f'Loss: {loss}')
-                print(loss)
+            if step % 50 == 0:
+                print(f'at step {step}: loss: {loss.item()}')
 
             loss.backward()
             optimizer.step()
+
+        # save model
+        if not os.path.exists('./models'):
+            os.mkdir('./models')
+        torch.save(model.state_dict(),
+                   f'./models/trained_w2v_epoch_{epoch}.pt')
