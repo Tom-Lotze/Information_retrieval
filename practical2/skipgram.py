@@ -35,6 +35,7 @@ class Skipgram(nn.Module):
         self.counter = counter
 
         # vocab needs to be made and filtered on infrequent words
+        self.docs = docs
         self.vocab = vocab
         self.inv_vocab = {v: k for k, v in vocab.items()}
         self.vocab_size = len(vocab)
@@ -53,7 +54,7 @@ class Skipgram(nn.Module):
 
     def forward(self, pos_u, pos_v, neg_v):
         """Perform a forward pass on the tuple of two one hot encodings
-        Input: 
+        Input:
         - pos_u : list of positive target word indices
         - pos_v : list of positive context word indices
         - neg_v : list of negative context word indices
@@ -132,6 +133,62 @@ class Skipgram(nn.Module):
                 scores[w] = sim.item()
         # return most common
         return scores.most_common(10)
+
+    def aggregate_doc(self, doc):
+        '''Get doc_id and create vector by aggregating'''
+        with torch.no_grad():
+            rel_words = [w for w in doc if w in self.vocab.keys()]
+            embeddings_tensor = torch.empty(
+                len(rel_words), self.embedding_dim)
+
+            for i, word in enumerate(rel_words):
+                if word in self.vocab.keys():
+                    word_idx = torch.Tensor([self.word_to_idx(word)]).long()
+                    word_E = self.target_embedding(word_idx)
+                    embeddings_tensor[i, :] = word_E
+                    del word_E
+
+            doc_E = torch.mean(embeddings_tensor, dim=0)
+        return doc_E
+
+    def aggregate_all_docs(self):
+        ''' aggregate all docs to save time during retrieval'''
+        agg_docs = torch.empty(len(self.docs.keys()), self.embedding_dim)
+
+        for i, (doc_id, doc) in enumerate(self.docs.items()):
+            print(f'Doc: {i}')
+            doc_E = self.aggregate_doc(doc)
+            agg_docs[i, :] = doc_E
+            del doc_E
+
+        with open('aggregated_docs.pt', 'wb') as f:
+            pkl.dump(agg_docs, f)
+
+        print('Aggregated all docs')
+
+    def rank_docs(self, query):
+        '''Ranks docs given query'''
+        q = process_text(query)
+        q_E = self.aggregate_doc(q)
+
+        # cossim = nn.CosineSimilarity(dim=0)
+
+        scores = Counter()
+
+        with open('./aggregated_docs.pt', 'rb') as f:
+            agg_docs = pkl.load(f)
+
+        for i, (doc_id, doc) in enumerate(self.docs.items()):
+            if i % 1000 == 0:
+                print(i)
+
+            doc_E = agg_docs[i, :]
+
+            sim = torch.sum(torch.mul(q_E, doc_E).squeeze())
+
+            scores[doc_id] = sim
+
+        return scores.most_common(20)
 
 
 def get_batches(model, docs, batch_size, pdf):
