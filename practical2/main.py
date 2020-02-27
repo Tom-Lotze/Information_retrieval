@@ -46,8 +46,23 @@ if __name__ == "__main__":
     # print example document
     # print(docs["AP891026-0263"])
 
-    vocab, counter = create_vocab(docs_test)
+
+
+    try:
+        vocab = pkl.load(open("./vocab_word2vec.pt", "rb"))
+        counter = pkl.load(open("./counter_word2vec.pt", "rb"))
+    except:
+        vocab, counter = create_vocab(docs_test)
+        with open("./vocab_word2vec.pt", "wb") as w:
+            pkl.dump(vocab, w)
+        with open("./counter_word2vec.pt", "wb") as w2:
+            pkl.dump(counter, w2)
+
 
     SKIP = Skipgram(docs_test, vocab, counter, "mean")
 
-    embeddings = train_skipgram(SKIP, docs_test)
+    SKIP.load_state_dict(torch.load("models/trained_w2v_epoch_1.pt"))
+
+    benchmark(SKIP)
+
+    #embeddings = train_skipgram(SKIP, docs_test)

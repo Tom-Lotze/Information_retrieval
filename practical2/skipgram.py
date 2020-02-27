@@ -173,25 +173,20 @@ class Skipgram(nn.Module):
     def rank_docs(self, query):
         '''Ranks docs given query'''
         q = process_text(query)
-
         q_E = self.aggregate_doc(q).view(1, self.embedding_dim)
-
         cossim = nn.CosineSimilarity(dim=1)
-
         doc_ids = [doc_id for doc_id in self.docs.keys()]
-
         scores = Counter()
 
         with open('./aggregated_docs.pt', 'rb') as f:
             agg_docs = pkl.load(f)
 
         sim = cossim(q_E, agg_docs)
-
         sort_indx = torch.argsort(sim, descending=True)
-
         scores = [(doc_ids[idx], sim[idx]) for idx in sort_indx]
 
         return scores
+
 
 
 def get_batches(model, docs, batch_size, pdf):
@@ -290,3 +285,26 @@ def train_skipgram(model, docs):
             os.mkdir('./models')
         torch.save(model.state_dict(),
                    f'./models/trained_w2v_epoch_{epoch}.pt')
+
+
+def benchmark(model):
+    qrels, queries = read_qrels()
+
+    overall_ser = {}
+
+    # Adopted version from the TFIDF benchmark test
+    print("Running GENSIM Benchmark")
+    # collect results
+    for qid in tqdm(qrels): 
+        query = queries[qid]
+        results = model.rank_docs(query) 
+        print(results)
+        overall_ser[qid] = dict([(idx2key[idx], score) for idx, score in results])
+
+    #print(overall_ser[100])
+    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
+    metrics = evaluator.evaluate(overall_ser)
+
+    # dump to JSON
+    with open("word2vec.json", "w") as writer:
+       json.dump(metrics, writer, indent=1)
