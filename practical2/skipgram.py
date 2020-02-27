@@ -9,7 +9,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from collections import Counter
-# from scipy.spatial.distance import cosine as cos_similarity
+import pytrec_eval
+import json
+from tqdm import tqdm
 
 
 class Skipgram(nn.Module):
@@ -298,10 +300,10 @@ def benchmark(model):
     for qid in tqdm(qrels): 
         query = queries[qid]
         results = model.rank_docs(query) 
-        print(results)
-        overall_ser[qid] = dict([(idx2key[idx], score) for idx, score in results])
+        #print(results)
+        overall_ser[qid] = dict([(idx, score.item()) for idx, score in results])
 
-    #print(overall_ser[100])
+
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
     metrics = evaluator.evaluate(overall_ser)
 

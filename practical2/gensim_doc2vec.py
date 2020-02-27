@@ -9,6 +9,7 @@ import read_ap
 from tqdm import tqdm
 import pytrec_eval
 import json
+import numpy as np
 
 
 def training(docs):
@@ -90,6 +91,7 @@ def benchmark(model, docs, idx2key):
 
 
 if __name__ == "__main__":
+    np.random.seed(42)
 
     # retrieve docs as a list
     processed_docs = get_processed_docs()
@@ -105,7 +107,7 @@ if __name__ == "__main__":
     model = training(documents)
 
     # perform benchmark on the model and jump to json file
-    benchmark(model, documents, idx2key)
+    #benchmark(model, documents, idx2key)
 
 
     # sanity check takes a LONG time on full sized doc collection (>2h)
@@ -115,7 +117,7 @@ if __name__ == "__main__":
     query_raw = "Bloomberg did not perform well during the Democratic election debate"
     ranking = rank(model, documents, query_raw)
     print(f"Ranking (top 10) for the query \"{query_raw}\":\n{ranking[:10]}\n")
-    for i in range(5):
+    for i in range(10):
         print(" ".join(processed_docs[idx2key[ranking[i][0]]]) + "\n")
 
 
