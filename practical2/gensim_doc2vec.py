@@ -34,6 +34,7 @@ def training(docs):
         model.save(model_name)
         print(f"Model is saved as {model_name}")
 
+    print(len(model.wv.vocab))
     return model
 
 
@@ -75,15 +76,16 @@ def benchmark(model, docs, idx2key):
     for qid in tqdm(qrels): 
         query_text = queries[qid]
         results = rank(model, docs, query_text) 
+        #print(results)
         overall_ser[qid] = dict([(idx2key[idx], score) for idx, score in results])
 
-
+    #print(overall_ser[100])
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
     metrics = evaluator.evaluate(overall_ser)
 
     # dump to JSON
     with open("gensim.json", "w") as writer:
-        json.dump(metrics, writer, indent=1)
+       json.dump(metrics, writer, indent=1)
 
 
 
