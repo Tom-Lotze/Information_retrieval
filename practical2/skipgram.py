@@ -30,7 +30,7 @@ class Skipgram(nn.Module):
         self.embedding_dim = embedding_dim
         self.window_size = 5
         self.nr_epochs = 2000
-        self.k = 10
+        self.k = 5
 
         self.counter = counter
 
@@ -52,32 +52,42 @@ class Skipgram(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, pos_u, pos_v, neg_v):
-        """Perform a forward pass on the tuple of two one hot encodings"""
+        """Perform a forward pass on the tuple of two one hot encodings
+        Input: 
+        - pos_u : list of positive target word indices
+        - pos_v : list of positive context word indices
+        - neg_v : list of negative context word indices
+
+        """
 
         # indices for positive and negative examples
-        # batch_size = len(pos_u)
         pos_u = Variable(torch.Tensor(pos_u).long())
         pos_v = Variable(torch.Tensor(pos_v).long())
         neg_v = Variable(torch.Tensor(neg_v).long())
 
+        # define batch size
         batch_size = len(pos_u) + len(pos_u) * self.k
 
         # target embedding (index the embeddings)
         pos_t_E = self.target_embedding(pos_u)
 
-        # positive embeddings
+        # positive context embeddings
         pos_E = self.context_embedding(pos_v)
 
+        # positie scores
         pos_score = torch.sum(torch.mul(pos_t_E, pos_E).squeeze(), dim=1)
         pos_score = torch.log(self.sigmoid(pos_score))
 
+        # negative context embeddings
         neg_E = self.context_embedding(neg_v)
 
+        # negative scores
         neg_score = torch.bmm(neg_E, pos_t_E.unsqueeze(2))
         neg_score = torch.sum(neg_score, dim=1)
 
         neg_score = torch.log(self.sigmoid(-neg_score)).squeeze()
 
+        # return loss
         return -(pos_score.sum() + neg_score.sum()) / batch_size
 
     def word_embedding(self, word):
@@ -109,24 +119,31 @@ class Skipgram(nn.Module):
         return np.random.choice(list(self.vocab.keys()), p=pdf, size=k)
 
     def most_similar(self, word_idx):
+        # define cosine similarity
         cossim = nn.CosineSimilarity()
+        # create counter dict
         scores = Counter()
+        # loop over all words in vocab
         for w, i in self.vocab.items():
             if i != word_idx:
                 sim = cossim(self.target_embedding(
                     word_idx), self.target_embedding(torch.Tensor([i]).long()))
+                # store cossims
                 scores[w] = sim.item()
+        # return most common
         return scores.most_common(10)
 
 
 def get_batches(model, docs, batch_size, pdf):
     ''' generate batches '''
 
+    # window size left and right
     top = int(model.window_size/2)
 
     pos_batch = []
     neg_batch = []
 
+    # shuffle the docs for this epoch
     docs_list = np.array(list(docs.values()))
     np.random.shuffle(docs_list)
 
@@ -171,32 +188,38 @@ def train_skipgram(model, docs):
     torch.manual_seed(42)
     np.random.seed(42)
 
+    # set optimizer HYPERPARAMS?
     optimizer = optim.SparseAdam(model.parameters())
 
-    # batches = get_batches(model, docs)
-
+    # batch size
     batch_size = 256
 
+    # get pdf for negative sampling
     pdf = model.get_neg_sample_pdf(model.counter)
 
+    # epoch
     for epoch in range(model.nr_epochs):
         print(f"Epoch nr {epoch}")
 
+        # get batch of positive and negative examples
         for step, (pos_batch, neg_batch) in enumerate(get_batches(model, docs,
                                                                   batch_size,
                                                                   pdf)):
             # print(pos_batch, neg_batch)
             optimizer.zero_grad()
 
+            # extracht words
             pos_u = [x[0] for x in pos_batch]
             pos_v = [x[1] for x in pos_batch]
             neg_v = neg_batch
 
+            # forward pass
             loss = model.forward(pos_u, pos_v, neg_v)
 
             if step % 50 == 0:
                 print(f'at step {step}: loss: {loss.item()}')
 
+            # backprop
             loss.backward()
             optimizer.step()
 
