@@ -23,7 +23,6 @@ class Skipgram(nn.Module):
             - window_size: window size in the skip gram model
 
         """
-
         super(Skipgram, self).__init__()
 
         # set tunable parameters
@@ -82,6 +81,7 @@ class Skipgram(nn.Module):
         # negative context embeddings
         neg_E = self.context_embedding(neg_v)
 
+        print(f'neg_e: {neg_E.shape}, pos_E: {pos_t_E.shape}')
         # negative scores
         neg_score = torch.bmm(neg_E, pos_t_E.unsqueeze(2))
         neg_score = torch.sum(neg_score, dim=1)
@@ -98,7 +98,7 @@ class Skipgram(nn.Module):
 
     def word_to_idx(self, word):
         """Returns the index of the word (string) in the vocabulary (dict)"""
-        return self.vocab[word]
+        return torch.Tensor([self.vocab[word]]).long()
 
     def idx_to_word(self, idx, inv_vocab):
         """
@@ -119,11 +119,14 @@ class Skipgram(nn.Module):
     def neg_sample(self, counter, pdf, k):
         return np.random.choice(list(self.vocab.keys()), p=pdf, size=k)
 
-    def most_similar(self, word_idx):
-        # define cosine similarity
+    def most_similar(self, word):
+        """Find most similar word given a target word"""
+        word_idx = self.word_to_idx(process_text(word)[0])
         cossim = nn.CosineSimilarity()
+
         # create counter dict
         scores = Counter()
+
         # loop over all words in vocab
         for w, i in self.vocab.items():
             if i != word_idx:
@@ -131,6 +134,7 @@ class Skipgram(nn.Module):
                     word_idx), self.target_embedding(torch.Tensor([i]).long()))
                 # store cossims
                 scores[w] = sim.item()
+
         # return most common
         return scores.most_common(10)
 
@@ -143,7 +147,7 @@ class Skipgram(nn.Module):
 
             for i, word in enumerate(rel_words):
                 if word in self.vocab.keys():
-                    word_idx = torch.Tensor([self.word_to_idx(word)]).long()
+                    word_idx = self.word_to_idx(word)
                     word_E = self.target_embedding(word_idx)
                     embeddings_tensor[i, :] = word_E
                     del word_E
@@ -169,26 +173,25 @@ class Skipgram(nn.Module):
     def rank_docs(self, query):
         '''Ranks docs given query'''
         q = process_text(query)
-        q_E = self.aggregate_doc(q)
 
-        # cossim = nn.CosineSimilarity(dim=0)
+        q_E = self.aggregate_doc(q).view(1, self.embedding_dim)
+
+        cossim = nn.CosineSimilarity(dim=1)
+
+        doc_ids = [doc_id for doc_id in self.docs.keys()]
 
         scores = Counter()
 
         with open('./aggregated_docs.pt', 'rb') as f:
             agg_docs = pkl.load(f)
 
-        for i, (doc_id, doc) in enumerate(self.docs.items()):
-            if i % 1000 == 0:
-                print(i)
+        sim = cossim(q_E, agg_docs)
 
-            doc_E = agg_docs[i, :]
+        sort_indx = torch.argsort(sim, descending=True)
 
-            sim = torch.sum(torch.mul(q_E, doc_E).squeeze())
+        scores = [(doc_ids[idx], sim[idx]) for idx in sort_indx]
 
-            scores[doc_id] = sim
-
-        return scores.most_common(20)
+        return scores
 
 
 def get_batches(model, docs, batch_size, pdf):
@@ -232,11 +235,13 @@ def get_batches(model, docs, batch_size, pdf):
             # if larger than batch size, sample negative
             if len(pos_batch) > batch_size:  # FIX
                 for pos_x in pos_batch:
-                    neg_batch.append([model.word_to_idx(c)
+                    neg_batch.append([model.word_to_idx(c).item()
                                       for c in model.neg_sample(model.counter,
                                                                 pdf, model.k)])
                 yield (pos_batch, neg_batch)
                 pos_pairs = []
+                neg_batch = []
+                pos_batch = []
 
 
 def train_skipgram(model, docs):
@@ -266,8 +271,8 @@ def train_skipgram(model, docs):
             optimizer.zero_grad()
 
             # extracht words
-            pos_u = [x[0] for x in pos_batch]
-            pos_v = [x[1] for x in pos_batch]
+            pos_u = [x[0].item() for x in pos_batch]
+            pos_v = [x[1].item() for x in pos_batch]
             neg_v = neg_batch
 
             # forward pass
