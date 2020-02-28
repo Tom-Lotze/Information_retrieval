@@ -5,15 +5,15 @@ from scipy.stats import ttest_rel
 from itertools import combinations
 
 def process_json():
-    curr_path = os.getcwd()
+    curr_path = os.path.join(os.getcwd(), "json_files/")
 
     json_files = [file for file in os.listdir(curr_path) if file.endswith(".json")]
-    print(json_files)
+    #print(json_files)
     scores = dict()
 
     for file in json_files:
         print("\n"+file)
-        with open(file) as f:
+        with open(os.path.join("json_files", file)) as f:
             scores_dict = json.load(f)
         scores[file] = scores_dict
         avg_map_all = np.mean([scores_dict[query_scores]["map"] for query_scores in 
@@ -48,5 +48,8 @@ def process_json():
     # LSI-LDA
 
     return 0
+
+if __name__ == "__main__":
+    process_json()
 
 
