@@ -94,7 +94,7 @@ class Skipgram(nn.Module):
         return -(pos_score.sum() + neg_score.sum()) / batch_size
 
     def word_embedding(self, word):
-        # inference model that returns an embedding for the word
+        ''' Take word as string and return embedding'''
         word_index = self.word_to_idx(word, self.vocab)
         return self.target_embedding(word_index)
 
@@ -110,6 +110,7 @@ class Skipgram(nn.Module):
         return inv_vocab[idx]
 
     def get_neg_sample_pdf(self, counter):
+        ''' generate probability distribution for negative sampling'''
         denominator = np.sum([np.power(counter[w], 3/4)
                               for w in self.vocab.keys()])
 
@@ -119,6 +120,7 @@ class Skipgram(nn.Module):
         return sampling_list
 
     def neg_sample(self, counter, pdf, k):
+        ''' sample k negative training examples'''
         return np.random.choice(list(self.vocab.keys()), p=pdf, size=k)
 
     def most_similar(self, word):
@@ -143,17 +145,20 @@ class Skipgram(nn.Module):
     def aggregate_doc(self, doc):
         '''Get doc_id and create vector by aggregating'''
         with torch.no_grad():
+            # get the words that are in vocab
             rel_words = [w for w in doc if w in self.vocab.keys()]
+            # get embeddings for words
             embeddings_tensor = torch.empty(
                 len(rel_words), self.embedding_dim)
 
+            # get embeddings for all words
             for i, word in enumerate(rel_words):
                 if word in self.vocab.keys():
                     word_idx = self.word_to_idx(word)
                     word_E = self.target_embedding(word_idx)
                     embeddings_tensor[i, :] = word_E
                     del word_E
-
+            # mean over word embeddings
             doc_E = torch.mean(embeddings_tensor, dim=0)
         return doc_E
 
@@ -161,12 +166,14 @@ class Skipgram(nn.Module):
         ''' aggregate all docs to save time during retrieval'''
         agg_docs = torch.empty(len(self.docs.keys()), self.embedding_dim)
 
+        # loop over all docs and get embedding and store
         for i, (doc_id, doc) in enumerate(self.docs.items()):
             print(f'Doc: {i}')
             doc_E = self.aggregate_doc(doc)
             agg_docs[i, :] = doc_E
             del doc_E
 
+        # dump all aggregated docs to load them later
         with open('aggregated_docs.pt', 'wb') as f:
             pkl.dump(agg_docs, f)
 
@@ -174,21 +181,35 @@ class Skipgram(nn.Module):
 
     def rank_docs(self, query):
         '''Ranks docs given query'''
+        # get query and process
         q = process_text(query)
+
+        # get query embedding
         q_E = self.aggregate_doc(q).view(1, self.embedding_dim)
+
+        # initialize cosine similarity
         cossim = nn.CosineSimilarity(dim=1)
+
+        # get doc ids
         doc_ids = [doc_id for doc_id in self.docs.keys()]
+
+        # initialize dictionary as counter object
         scores = Counter()
 
+        # load all doc embeddings
         with open('./aggregated_docs.pt', 'rb') as f:
             agg_docs = pkl.load(f)
 
+        # batch cosine similarity over docs and query
         sim = cossim(q_E, agg_docs)
+
+        # sort the indices
         sort_indx = torch.argsort(sim, descending=True)
+
+        # return list of tuples
         scores = [(doc_ids[idx], sim[idx]) for idx in sort_indx]
 
         return scores
-
 
 
 def get_batches(model, docs, batch_size, pdf):
@@ -297,16 +318,16 @@ def benchmark(model):
     # Adopted version from the TFIDF benchmark test
     print("Running GENSIM Benchmark")
     # collect results
-    for qid in tqdm(qrels): 
+    for qid in tqdm(qrels):
         query = queries[qid]
-        results = model.rank_docs(query) 
-        #print(results)
-        overall_ser[qid] = dict([(idx, score.item()) for idx, score in results])
-
+        results = model.rank_docs(query)
+        # print(results)
+        overall_ser[qid] = dict([(idx, score.item())
+                                 for idx, score in results])
 
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
     metrics = evaluator.evaluate(overall_ser)
 
     # dump to JSON
     with open("word2vec.json", "w") as writer:
-       json.dump(metrics, writer, indent=1)
+        json.dump(metrics, writer, indent=1)
