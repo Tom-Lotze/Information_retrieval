@@ -12,15 +12,15 @@ import json
 import numpy as np
 
 
-def training(docs):
+def training(docs, max_vocab_size, vector_dim=300, window_size=2):
     """
     This function takes the processed documents and trains a gensim Doc2Vec
     model on it. If there is a saved model, it loads the model and returns that
     """
     begin = time()
-    model_name = f"gensim_{len(docs)}.model"
+    model_name = f"gensim_{len(docs)}_{max_vocab_size}_{vector_dim}_{window_size}.model"
     print(f"model name: {model_name}")
-    model = Doc2Vec(vector_size=300, window=2, min_count=50, workers=4, epochs=2, seed=42)
+    model = Doc2Vec(vector_size=vector_dim, window=window_size, workers=4, epochs=2, seed=42, max_vocab_size=max_vocab_size)
     print(f"Model initialized in {time()-begin:.2f} seconds\n")
 
     try: 
@@ -36,7 +36,7 @@ def training(docs):
         print(f"Model is saved as {model_name}")
 
     print(len(model.wv.vocab))
-    return model
+    return model, model_name
 
 
 def sanity_check(model, docs):
@@ -66,7 +66,7 @@ def rank(model, docs, query_raw):
 
     return ranking
 
-def benchmark(model, docs, idx2key):
+def benchmark(model, model_name, docs, idx2key):
     qrels, queries = read_ap.read_qrels()
 
     overall_ser = {}
@@ -84,9 +84,13 @@ def benchmark(model, docs, idx2key):
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
     metrics = evaluator.evaluate(overall_ser)
 
+    json_filename = f"Benchmark_{model_name}.json"
+
     # dump to JSON
-    with open("gensim.json", "w") as writer:
+    with open(json_file_name, "w") as writer:
        json.dump(metrics, writer, indent=1)
+
+    return json_filename
 
 
 
@@ -104,21 +108,21 @@ if __name__ == "__main__":
     print(f"Docs are loaded. {len(docs)} in total\n")
 
     # train the model
-    model = training(documents)
+    model, model_name = training(documents, max_vocab_size=3000000, vector_dim=300, window_size=2)
 
     # perform benchmark on the model and jump to json file
-    #benchmark(model, documents, idx2key)
-
+    #json_filename = benchmark(model, model_name, documents, idx2key)
 
     # sanity check takes a LONG time on full sized doc collection (>2h)
     #print(f"Sanity check:\n{sanity_check(model, documents)}\n")
     
     # ranking on example query
-    query_raw = "Bloomberg did not perform well during the Democratic election debate"
-    ranking = rank(model, documents, query_raw)
-    print(f"Ranking (top 10) for the query \"{query_raw}\":\n{ranking[:10]}\n")
-    for i in range(10):
-        print(" ".join(processed_docs[idx2key[ranking[i][0]]]) + "\n")
+    
+    # query_raw = "Bloomberg did not perform well during the Democratic election debate"
+    # ranking = rank(model, documents, query_raw)
+    # print(f"Ranking (top 10) for the query \"{query_raw}\":\n{ranking[:10]}\n")
+    # for i in range(10):
+    #     print(" ".join(processed_docs[idx2key[ranking[i][0]]]) + "\n")
 
 
 
