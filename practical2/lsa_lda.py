@@ -94,24 +94,7 @@ def create_index(model):
 
 
 
-def query(q, model='lsi_bin'):
-    assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
-    index = get_index(model)
-    dictionary = get_dictionary()
-
-    # get doc representation
-    q = preprocess_text(q)
-    q = dictionary.doc2bow(q)
-    
-    sims = index[q]
-
-    sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    for i, s in enumerate(sims):
-        print(s, documents[i])
-
-    
-    return sims
 
 
 # helper functions
@@ -150,6 +133,35 @@ def get_model(model):
         return LsiModel.load(filepath)
     else:
         return LdaModel.load(filepath)
+
+
+
+class Search:
+
+
+    def __init__(self, model):
+        self.index = get_index(model)
+        self.dictionary = get_dictionary()
+
+
+    def query(self, q, model='lsi_bin'):
+
+        assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
+
+
+        # get doc representation
+        q = read_ap.process_text(q)
+        q = self.dictionary.doc2bow(q)
+        
+        sims = self.index[q]
+
+        sims = sorted(enumerate(sims), key=lambda item: -item[1])
+        # for i, s in enumerate(sims):
+        #     print(s, documents[i])
+        
+        return sims
+
+
 
 
 
