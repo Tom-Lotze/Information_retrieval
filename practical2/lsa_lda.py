@@ -4,6 +4,7 @@ import read_ap
 import time
 import os
 import pickle
+import numpy as np
 
 # constants
 folder_path_models = 'models'
@@ -16,7 +17,7 @@ os.makedirs(folder_path_objects, exist_ok=True)
 os.makedirs(folder_path_results, exist_ok=True)
 
 
-def train(t):
+def train(n_topics = num_topics):
 
     docs = read_ap.get_processed_docs()
     docs = [d for i,d in docs.items()]
@@ -48,26 +49,26 @@ def train(t):
     lsi_bin = LsiModel(
         corpus = corpus_binary, 
         id2word = dictionary,
-        num_topics = num_topics
+        num_topics = n_topics
     )
 
     print(f'{time.ctime()} Start training LSA (tf-idf)')
     lsi_tfidf = LsiModel(
         corpus = corpus_tfidf, 
         id2word = dictionary,
-        num_topics = num_topics
+        num_topics = n_topics
     )
 
     print(f'{time.ctime()} Start training LDA (tf-idf)')
     lda_tfidf = LdaModel(
         corpus = corpus_tfidf, 
         id2word = dictionary,
-        num_topics = num_topics
+        num_topics = n_topics,
+        dtype = np.float64
     )
 
-
     # save models to disk    
-    os.makedirs(folder_path, exist_ok=True)
+    os.makedirs(folder_path_models, exist_ok=True)
     filepath_out = lambda model: os.path.join('models', f'{model}_{t}')
 
     lsi_bin.save(filepath_out('lsi_bin'))
@@ -98,7 +99,7 @@ def create_index(model):
 
 
 # helper functions
-def get_index(model):
+def get_index(model, num_topics):
     assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
     # if 'tfidf' in model:
@@ -108,7 +109,7 @@ def get_index(model):
 
     
 
-    filepath_in = os.path.join(folder_path_objects, f'index_{model}')
+    filepath_in = os.path.join(folder_path_objects, f'index_{model}_{num_topics}')
     index = similarities.MatrixSimilarity.load(filepath_in)
 
     return index
@@ -124,10 +125,10 @@ def get_corpus(corpus):
     with open(os.path.join(folder_path_objects, f'corpus_{corpus}'), 'rb') as f:
         return pickle.load(f)
 
-def get_model(model):
+def get_model(model, num_topics=500):
     assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
-    filepath = os.path.join(folder_path_models, model)
+    filepath = os.path.join(folder_path_models, f'{model}_{num_topics}')
 
     if 'lsi' in model:
         return LsiModel.load(filepath)
@@ -139,12 +140,14 @@ def get_model(model):
 class Search:
 
 
-    def __init__(self, model):
-        self.index = get_index(model)
+    def __init__(self, model, num_topics):
+        assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
+
+        self.index = get_index(model, num_topics)
         self.dictionary = get_dictionary()
 
 
-    def query(self, q, model='lsi_bin'):
+    def query(self, q):
 
         assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
@@ -169,7 +172,7 @@ if __name__ == '__main__':
     t = int(time.time())
 
     # train models
-    train(t)
+    train(n_topics=500)
 
     # create indices
     create_index('lsi_bin')

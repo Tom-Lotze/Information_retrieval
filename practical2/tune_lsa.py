@@ -2,23 +2,26 @@
 # from gensim.test.utils import common_texts
 # from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 import read_ap
-from process_json import *
 from gensim.models import LsiModel, LdaModel, TfidfModel
 
 import os
 from collections import Counter
-from time import time
+import time
 import read_ap
 from tqdm import tqdm
-import pytrec_eval
 import json
 import numpy as np
-
+# import lsa_lda_benchmark
+from gensim import corpora, similarities
 
 # initialize for gridsearch
 vector_n_topics = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
 
 # create directories
+folder_path_models = 'models'
+folder_path_objects = 'objects'
+folder_path_results = 'results'
+
 os.makedirs("json_files", exist_ok=True)
 os.makedirs("models", exist_ok=True)
 
@@ -37,30 +40,31 @@ print(f"{len(docs)} docs are loaded")
 
 
 for num_topics in vector_n_topics:
-    print(f"\nvec_dim: {vec_dim}")
 
-    print(f'{time.ctime()} Start training LSA (tf-idf)')
+    print(f'{time.ctime()} Start training LSA (tf-idf) num_topics = {num_topics}')
     lsi_tfidf = LsiModel(
         corpus = corpus_tfidf, 
         id2word = dictionary,
         num_topics = num_topics
     )
 
-    if not os.path.isfile(f"./json_files/benchmark_lsi_tfidf.json"):
-        _ = benchmark(model, model_name, docs, idx2key)
+    # save model
+    fp_model_out = os.path.join(folder_path_models, f'lsi_tfidf_{num_topics}')
+    lsi_tfidf.save(fp_model_out)
 
-    print(f'{time.ctime()} Start training LDA (tf-idf)')
-    lda_tfidf = LdaModel(
-        corpus = corpus_tfidf, 
-        id2word = dictionary,
-        num_topics = num_topics,
-        dtype = np.float64
+    index = similarities.SparseMatrixSimilarity(
+        lsi_tfidf[corpus_tfidf],
+        num_features=len(dictionary.token2id)
     )
 
-    if not os.path.isfile(f"./json_files/benchmark_lda_tfidf.json"):
-        _ = benchmark(model, model_name, docs, idx2key)
+    # save index
+    fp_index_out = os.path.join(folder_path_objects, f'index_lsi_tfidf_{num_topics}')
+    index.save(fp_index_out)
 
-        # window sizes
+
+
+
+
 
 
 
