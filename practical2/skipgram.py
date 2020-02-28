@@ -30,7 +30,7 @@ class Skipgram(nn.Module):
         # set tunable parameters
         self.embedding_dim = embedding_dim
         self.window_size = 5
-        self.nr_epochs = 2000
+        self.nr_epochs = 1
         self.k = 5
 
         self.counter = counter
@@ -83,7 +83,6 @@ class Skipgram(nn.Module):
         # negative context embeddings
         neg_E = self.context_embedding(neg_v)
 
-        print(f'neg_e: {neg_E.shape}, pos_E: {pos_t_E.shape}')
         # negative scores
         neg_score = torch.bmm(neg_E, pos_t_E.unsqueeze(2))
         neg_score = torch.sum(neg_score, dim=1)
@@ -223,6 +222,7 @@ def get_batches(model, docs, batch_size, pdf):
 
     # shuffle the docs for this epoch
     docs_list = np.array(list(docs.values()))
+
     np.random.shuffle(docs_list)
 
     for j, doc in enumerate(docs_list):
@@ -230,6 +230,9 @@ def get_batches(model, docs, batch_size, pdf):
         padded_doc = ["NULL"] * top + doc + ["NULL"] * top
 
         print(f'Doc: {j}')
+
+        if j % 1000 == 0:
+            print('Trained on {j} docs')
 
         # loop over words in doc
         for i, target_word in enumerate(doc):
@@ -261,13 +264,11 @@ def get_batches(model, docs, batch_size, pdf):
                 neg_batch = []
                 pos_batch = []
 
+        if j == (len(docs) * 0.1):
+            break
+
 
 def train_skipgram(model, docs):
-    # numpy seed
-    # set torch seed
-    torch.manual_seed(42)
-    np.random.seed(42)
-
     # set optimizer HYPERPARAMS?
     optimizer = optim.SparseAdam(model.parameters())
 
@@ -279,16 +280,15 @@ def train_skipgram(model, docs):
 
     # epoch
     for epoch in range(model.nr_epochs):
-        print(f"Epoch nr {epoch}")
+        print(f"Epoch: {epoch}")
 
         # get batch of positive and negative examples
         for step, (pos_batch, neg_batch) in enumerate(get_batches(model, docs,
                                                                   batch_size,
                                                                   pdf)):
-            # print(pos_batch, neg_batch)
             optimizer.zero_grad()
 
-            # extracht words
+            # extract words
             pos_u = [x[0].item() for x in pos_batch]
             pos_v = [x[1].item() for x in pos_batch]
             neg_v = neg_batch
@@ -307,7 +307,13 @@ def train_skipgram(model, docs):
         if not os.path.exists('./models'):
             os.mkdir('./models')
         torch.save(model.state_dict(),
-                   f'./models/trained_w2v_epoch_{epoch}.pt')
+                   f'./models/trained_w2v_bs_256_thr_120.pt')
+
+    # aggregate all docs to embeddings for retrieval
+    print('Done with training. \nConverting all documents to embeddings.',
+          'This may take a while.')
+    model.aggregate_all_docs()
+    print('Done with converting all docs')
 
 
 def benchmark(model):

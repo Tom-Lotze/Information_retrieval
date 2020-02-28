@@ -29,7 +29,10 @@ def create_vocab(docs, threshold=120):
 
 
 if __name__ == "__main__":
-    np.random_seed = 42
+    # set seeds
+    torch.manual_seed(42)
+    np.random.seed(42)
+
     docs_path = "./processed_docs.pkl"
     assert os.path.exists(docs_path), "Processed docs could not be found in this\
         directory. They will be processed now"
@@ -46,8 +49,6 @@ if __name__ == "__main__":
     # print example document
     # print(docs["AP891026-0263"])
 
-
-
     try:
         vocab = pkl.load(open("./vocab_word2vec.pt", "rb"))
         counter = pkl.load(open("./counter_word2vec.pt", "rb"))
@@ -58,11 +59,10 @@ if __name__ == "__main__":
         with open("./counter_word2vec.pt", "wb") as w2:
             pkl.dump(counter, w2)
 
-
     SKIP = Skipgram(docs_test, vocab, counter, "mean")
 
     SKIP.load_state_dict(torch.load("models/trained_w2v_epoch_1.pt"))
 
-    benchmark(SKIP)
+    # benchmark(SKIP)
 
-    #embeddings = train_skipgram(SKIP, docs_test)
+    train_skipgram(SKIP, docs_test)
