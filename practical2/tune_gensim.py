@@ -39,32 +39,29 @@ documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(docs)]
 print(f"{len(docs)} docs are loaded")
 
 
-
 # vector dimensions
 for vec_dim in vector_dimensions:
     print(f"\nvec_dim: {vec_dim}")
     model, model_name = training(documents, max_vocab_size=default_vocab_size,
-        vector_dim=vec_dim, window_size=default_window_size)
+                                 vector_dim=vec_dim, window_size=default_window_size)
 
-    if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
-        _ = benchmark(model, model_name, docs, idx2key):
-
-
-# window sizes
-for win_size in window_sizes:
-    print(f"\nwindow size: {win_size}")
-    model, model_name = training(documents, max_vocab_size=default_vocab_size,
-        vector_dim=default_vector_dim, window_size=win_size)
-    
     if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
         _ = benchmark(model, model_name, docs, idx2key)
 
+        # window sizes
+for win_size in window_sizes:
+    print(f"\nwindow size: {win_size}")
+    model, model_name = training(documents, max_vocab_size=default_vocab_size,
+                                 vector_dim=default_vector_dim, window_size=win_size)
+
+    if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
+        _ = benchmark(model, model_name, docs, idx2key)
 
 
 for max_vocab in vocab_sizes:
     print(f"\nmax voab size: {max_vocab}")
     model, model_name = training(documents, max_vocab_size=max_vocab,
-        vector_dim=default_vector_dim, window_size=default_window_size)
+                                 vector_dim=default_vector_dim, window_size=default_window_size)
 
     if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
         _ = benchmark(model, model_name, docs, idx2key)
