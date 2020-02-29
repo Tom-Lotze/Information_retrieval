@@ -15,7 +15,8 @@ import numpy as np
 from gensim import corpora, similarities
 
 # initialize for gridsearch
-vector_n_topics = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
+# vector_n_topics = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
+vector_n_topics = [5000, 10000]
 
 # create directories
 folder_path_models = 'models'
