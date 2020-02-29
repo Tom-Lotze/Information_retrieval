@@ -99,17 +99,15 @@ def create_index(model):
 
 
 # helper functions
-def get_index(model, num_topics):
-    assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
+def get_index(model_type, num_topics):
+    assert model_type in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
     # if 'tfidf' in model:
     #     corpus = get_corpus('tfidf')
     # else:
     #     corpus = get_corpus('binary')
 
-    
-
-    filepath_in = os.path.join(folder_path_objects, f'index_{model}_{num_topics}')
+    filepath_in = os.path.join(folder_path_objects, f'index_{model_type}_{num_topics}')
     index = similarities.MatrixSimilarity.load(filepath_in)
 
     return index
@@ -139,33 +137,36 @@ def get_model(model, num_topics=500):
 
 class Search:
 
+    def __init__(self, model, model_type, num_topics):
+        assert model_type in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
-    def __init__(self, model, num_topics):
-        assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
-
-        self.index = get_index(model, num_topics)
+        self.index = get_index(model_type, num_topics)
         self.dictionary = get_dictionary()
+        self.model = model
 
 
     def query(self, q):
 
-        assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
+        # assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
 
         # get doc representation
         q = read_ap.process_text(q)
         q = self.dictionary.doc2bow(q)
+
+        #print(f"q is : {q}")
+
+        # convert vector to LSI space
+        vec_query = self.model[q]
         
-        sims = self.index[q]
+        sims = self.index[vec_query]
 
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
+        
         # for i, s in enumerate(sims):
         #     print(s, documents[i])
         
         return sims
-
-
-
 
 
 if __name__ == '__main__':
