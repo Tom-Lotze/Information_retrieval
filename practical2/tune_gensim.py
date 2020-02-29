@@ -17,7 +17,7 @@ import numpy as np
 # initialize for gridsearch
 vector_dimensions = [200, 300, 400, 500]
 window_sizes = [5, 10, 15, 20]
-vocab_sizes = [10, 25, 50, 100, 200] * 1000
+vocab_sizes = [10, 25, 50, 100, 200]
 
 default_window_size = 5
 default_vector_dim = 300
