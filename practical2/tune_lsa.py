@@ -4,12 +4,9 @@
 import read_ap
 from gensim.models import LsiModel, TfidfModel
 import os
-from collections import Counter
 import time
 import read_ap
-from tqdm import tqdm
 import json
-import numpy as np
 from process_json import *
 
 # import lsa_lda_benchmark

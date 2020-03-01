@@ -29,7 +29,7 @@ Below, an overview is given of all files in this repo, and their function. The p
 - process_json.py: Perform analysis on the json files (average MAP and nDCG for test and all queries per model) and significance testing (t-test) between the different models.
 - query_analysis.py: finding the variance in query performance and best and worst performing queries per model.
 - result_files.py: creates the TREC style result files
-- lsa_lda_analysis.ipynb: extracting the topics from the LSI model
+- lsa_lda_analysis.ipynb: extracting the topics from the LSI model, old notebook and will not run anymore
 
 ## Plotting
 - plot_gensim.py: plot MAP of gridsearch models for Doc2Vec
