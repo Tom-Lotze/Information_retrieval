@@ -3,7 +3,7 @@
 # @Author: TomLotze
 # @Date:   2020-02-29 22:35:11
 # @Last Modified by:   TomLotze
-# @Last Modified time: 2020-03-01 10:24:32
+# @Last Modified time: 2020-03-01 10:30:43
 
 import os
 import json
@@ -46,11 +46,12 @@ for i in range(5):
 
 print(f"\nLowest and highest scoring queries per model:")
 for file in json_files:
-    print(f"{file[:-4]}")
+    print(f"{file[:-5]}")
     best = best_worse[file]["best"]
     worst = best_worse[file]["worst"]
     print(f"Best: QID: {best[0]} with MAP {best[1]}")
+    print(f"query text: {queries[best[0]]}")
     print(f"Worst: QID: {worst[0]} with MAP {worst[1]}")
-
+    print(f"query text: {queries[worst[0]]}")
 
 
