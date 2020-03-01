@@ -43,5 +43,19 @@ Below, an overview is given of all files in this repo, and their function. The p
 - json_files: JSON files with the 
 - results: TREC style result files
 
+## Instructions word2vec skipgram.py
+- Run main.py to train the skipgram
+  model. Training will take a while. After training, the model will aggregate all documents to embeddings that can be used for retrieval tasks. Use model.rank_docs(query) to get a ranking per query.
+
+## Instructions lsa_bow.py
+ - run lsa_bow.py and it will train and create an index. This index can be used for retrieval. Use search.query(q) where q is the query to retrieve a ranking of documents.
+
+## instructions lsa_tfidf.py
+ - Similar to lsa_bow.py
+
+## instructions lda_bow_kl_div.py
+   - run lda_bow_kl_div.py to train the model, create the index, get the ranking for all queries from the dataset and dump the json file.
+   - for individual queries, use the individual_query(query_text) function
+
   
 
