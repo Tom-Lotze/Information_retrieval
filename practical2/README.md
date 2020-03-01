@@ -17,6 +17,7 @@ Below, an overview is given of all files in this repo, and their function. The p
 - gensim_doc2vec.py
 - lsa_bow.py
 - lsa_lda.py (LSA TFIDF models) - NEEDS TO BE RENAMED TO LSA ONLY
+- lsa_tfidf.py
 - lda_bow_kl_div.py - LDA model with BOW and KL divergence ranking
 
 ### Tuning and benchmarking
