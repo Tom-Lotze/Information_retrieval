@@ -176,7 +176,7 @@ class Skipgram(nn.Module):
         with open('aggregated_docs.pt', 'wb') as f:
             pkl.dump(agg_docs, f)
 
-        print('Aggregated all docs')
+        print('Aggregated all docs, load aggregated_docs.pt for retrieval tasks.')
 
     def rank_docs(self, query):
         '''Ranks docs given query'''

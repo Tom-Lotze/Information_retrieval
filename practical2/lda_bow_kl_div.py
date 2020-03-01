@@ -60,7 +60,7 @@ def train(n_topics=num_topics):
     lda_bow.save(os.path.join(models_path, f'lda_bow_multi'))
 
 
-def create_index(n_topics=num_topics):
+def create_full_corpus(n_topics=num_topics):
 
     lda_bow = LdaModel.load(os.path.join(models_path, f'lda_bow_multi'))
     print('Loaded model')
@@ -87,7 +87,32 @@ def create_index(n_topics=num_topics):
 
 
 def get_sims(model, query, corpus_full, dictionary, n_topics):
-    ''' get ranking for single query'''
+    ''' get ranking for single query '''
+
+    # avoid division by 0
+    eps = 1e-8
+
+    # process query
+    query_processed = read_ap.process_text(query)
+    query_bow = dictionary.doc2bow(query_processed)
+    q_lda = sparse2full(model[query_bow], n_topics)
+    q_lda += eps
+
+    sims = []
+
+    # loop over all docs
+    for i, doc in enumerate(corpus_full):
+        doc += eps
+        sim = -1 * kullback_leibler(q_lda, doc)
+        sims.append(sim)
+
+    sim_ordered = sorted(enumerate(sims), key=lambda item: -1 * item[1])
+
+    return sim_ordered
+
+
+def get_sims(model, query, corpus_full, dictionary, n_topics):
+    ''' get ranking for single query, onl '''
 
     # avoid division by 0
     eps = 1e-8
@@ -112,7 +137,7 @@ def get_sims(model, query, corpus_full, dictionary, n_topics):
 
 
 def get_ranking(n_topics=num_topics):
-    ''' get ranking for all queries'''
+    ''' get ranking for all queries '''
 
     # load queries
     qrels, queries = read_ap.read_qrels()
@@ -165,7 +190,35 @@ def get_json():
         json.dump(metrics, f, indent=1)
 
 
-# train(500)
-# create_index(500)
-# get_ranking()
+train(500)
+create_full_corpus(500)
+get_ranking()
 get_json()
+
+
+# for individual queries:
+def individual_query(query_text):
+
+    docs = read_ap.get_processed_docs()
+    doc_keys = docs.keys()
+    idx2key = {i: key for i, key in enumerate(doc_keys)}
+
+    # load model
+    lda_bow = LdaModel.load(os.path.join(models_path, 'lda_bow_multi'))
+
+    # load corpus of full vectors
+    with open('./objects/lda_bow_full', 'rb') as f:
+        corpus_full = pkl.load(f)
+
+    # load dictionary
+    with open('./objects/dictionary_lda', 'rb') as f:
+        dictionary = pkl.load(f)
+
+    sims = get_sims(lda_bow, query_text, corpus_full, dictionary, num_topics)
+    ranking = dict([(idx2key[idx], np.float64(score))
+                    for idx, score in sims])
+    return ranking
+
+
+# query_text = 'politics'
+# print(individual_query(query_text))

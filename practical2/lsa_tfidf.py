@@ -1,4 +1,4 @@
-from gensim.models import LsiModel, LdaModel, TfidfModel
+from gensim.models import TfidfModel, LsiModel
 from gensim import corpora, similarities
 import read_ap
 import time
@@ -26,7 +26,8 @@ def train(n_topics=num_topics):
     dictionary.filter_extremes(no_below=50)
 
     # save the dictionary
-    with open(os.path.join(folder_path_objects, 'dictionary_lsi_bow'), 'wb') as f:
+    with open(os.path.join(folder_path_objects,
+                           'dictionary_lsi_bow'), 'wb') as f:
         pickle.dump(dictionary, f)
 
     # create binary and regular bow corpus
@@ -36,7 +37,8 @@ def train(n_topics=num_topics):
     tfidf = TfidfModel(corpus_bow)
     corpus_tfidf = tfidf[corpus_bow]
 
-    with open(os.path.join(folder_path_objects, 'corpus_lsi_tfidf'), 'wb') as f:
+    with open(os.path.join(folder_path_objects,
+                           'corpus_lsi_tfidf'), 'wb') as f:
         pickle.dump(corpus_tfidf, f)
 
     # create models
@@ -71,7 +73,7 @@ def create_index(model):
 # helper functions
 def get_index(model_type, num_topics):
 
-    corpus = get_corpus('tfidf')
+    # corpus = get_corpus('tfidf')
 
     filepath_in = os.path.join(
         folder_path_objects, f'index_{model_type}_{num_topics}')
@@ -81,12 +83,14 @@ def get_index(model_type, num_topics):
 
 
 def get_dictionary():
-    with open(os.path.join(folder_path_objects, 'dictionary_lsi_bow'), 'rb') as f:
+    with open(os.path.join(folder_path_objects,
+                           'dictionary_lsi_bow'), 'rb') as f:
         return pickle.load(f)
 
 
 def get_corpus(corpus):
-    with open(os.path.join(folder_path_objects, f'corpus_lsi_tfidf'), 'rb') as f:
+    with open(os.path.join(folder_path_objects,
+                           f'corpus_lsi_tfidf'), 'rb') as f:
         return pickle.load(f)
 
 
@@ -120,9 +124,6 @@ class Search:
 
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
 
-        # for i, s in enumerate(sims):
-        #     print(s, documents[i])
-
         return sims
 
 
@@ -133,5 +134,4 @@ if __name__ == '__main__':
     train(n_topics=500)
 
     # create indices
-    create_index('lsi_bin')
     create_index('lsi_tfidf')

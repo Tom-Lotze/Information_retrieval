@@ -125,9 +125,6 @@ class Search:
 
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
 
-        # for i, s in enumerate(sims):
-        #     print(s, documents[i])
-
         return sims
 
 
