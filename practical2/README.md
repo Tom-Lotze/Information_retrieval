@@ -13,10 +13,11 @@ Below, an overview is given of all files in this repo, and their function. The p
 ## Files
 ### Models
 - tf_idf.py
-- skipgram.py (called from main.py)
+- skipgram.py - word2vec model (called from main.py)
 - gensim_doc2vec.py
 - lsa_bow.py
-- lsa_lda.py
+- lsa_lda.py (LSA TFIDF models) - NEEDS TO BE RENAMED TO LSA ONLY
+- lda_bow_kl_div.py - LDA model with BOW and KL divergence ranking
 
 ### Tuning and benchmarking
 - tune_gensim.py: Gridsearch on the vocabulary size, embedding dimension and window size, saves all the models
