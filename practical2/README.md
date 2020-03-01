@@ -13,7 +13,7 @@ Below, an overview is given of all files in this repo, and their function. The p
 ## Files
 ### Models
 - tf_idf.py
-- skipgram.py - word2vec model (called from main.py)
+- skipgram.py - word2vec mode
 - gensim_doc2vec.py
 - lsa_bow.py - LSA for binary BOW
 - lsa_tfidf.py - LSA for TFIDF
@@ -43,7 +43,7 @@ Below, an overview is given of all files in this repo, and their function. The p
 - results: TREC style result files
 
 ## Instructions word2vec skipgram.py
-- Run main.py to train the skipgram
+   - run skipgram.py to train the model. The model will only train on 10% percent of the documents due to limited resources.
   model. Training will take a while. After training, the model will aggregate all documents to embeddings that can be used for retrieval tasks. Use model.rank_docs(query) to get a ranking per query.
 
 ## Instructions gensim_doc2vec.py

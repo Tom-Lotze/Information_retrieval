@@ -173,7 +173,7 @@ class Skipgram(nn.Module):
             del doc_E
 
         # dump all aggregated docs to load them later
-        with open('aggregated_docs.pt', 'wb') as f:
+        with open('w2v_aggregated_docs.pt', 'wb') as f:
             pkl.dump(agg_docs, f)
 
         print('Aggregated all docs, load aggregated_docs.pt for retrieval tasks.')
@@ -196,7 +196,7 @@ class Skipgram(nn.Module):
         scores = Counter()
 
         # load all doc embeddings
-        with open('./aggregated_docs.pt', 'rb') as f:
+        with open('./w2_aggregated_docs.pt', 'rb') as f:
             agg_docs = pkl.load(f)
 
         # batch cosine similarity over docs and query
@@ -304,6 +304,13 @@ def train_skipgram(model, docs):
             if step % 50 == 0:
                 print(f'at step {step}: loss: {loss.item()}')
 
+            # save every 1000 steps
+            if step & 1000 == 0:
+                if not os.path.exists('./models'):
+                    os.mkdir('./models')
+                    torch.save(model.state_dict(),
+                               f'./models/trained_w2v_bs_256_thr_120.pt')
+
             # backprop
             loss.backward()
             optimizer.step()
@@ -344,3 +351,64 @@ def benchmark(model):
     # dump to JSON
     with open("word2vec.json", "w") as writer:
         json.dump(metrics, writer, indent=1)
+
+
+def create_vocab(docs, threshold=120):
+    cntr = Counter()
+
+    for (doc_id, doc) in docs.items():
+        for word in doc:
+            cntr[word] += 1
+
+    vocabulary = {}
+
+    i = 0
+
+    for element in cntr:
+        if cntr[element] > threshold:
+            vocabulary[element] = i
+            i += 1
+
+    return vocabulary, cntr
+
+
+if __name__ == "__main__":
+    # set seeds
+    torch.manual_seed(42)
+    np.random.seed(42)
+
+    docs_path = "./processed_docs.pkl"
+    assert os.path.exists(docs_path), "Processed docs could not be found in this\
+        directory. They will be processed now"
+
+    # docs is a dictionary with doc-ids as keys, value: lists of
+    # preprocessed words
+    docs = get_processed_docs()
+    docs_test = docs
+    # docs_test = dict()
+
+    # for doc_id in list(docs.keys())[:1000]:
+    # docs_test[doc_id] = docs[doc_id]
+
+    # print example document
+    # print(docs["AP891026-0263"])
+
+    try:
+        vocab = pkl.load(open("./vocab_word2vec.pt", "rb"))
+        counter = pkl.load(open("./counter_word2vec.pt", "rb"))
+    except:
+        vocab, counter = create_vocab(docs_test)
+        with open("./vocab_word2vec.pt", "wb") as w:
+            pkl.dump(vocab, w)
+        with open("./counter_word2vec.pt", "wb") as w2:
+            pkl.dump(counter, w2)
+
+    SKIP = Skipgram(docs_test, vocab, counter, "mean")
+
+    # load model if already trained before.
+    # SKIP.load_state_dict(torch.load("models/trained_w2v_epoch_1.pt"))
+
+    train_skipgram(SKIP, docs_test)
+
+    # benchmark after training
+    benchmark(SKIP)

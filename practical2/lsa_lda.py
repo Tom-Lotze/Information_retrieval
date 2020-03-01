@@ -17,63 +17,64 @@ os.makedirs(folder_path_objects, exist_ok=True)
 os.makedirs(folder_path_results, exist_ok=True)
 
 
-def train(n_topics = num_topics):
+def train(n_topics=num_topics):
 
     docs = read_ap.get_processed_docs()
-    docs = [d for i,d in docs.items()]
+    docs = [d for i, d in docs.items()]
 
     dictionary = corpora.Dictionary(docs)
-
+    dictionary.filter_extremes(no_below=50
+                               )
     # save the dictionary
-    with open(os.path.join(folder_path_objects, 'dictionary'), 'wb') as f:
+    with open(os.path.join(folder_path_objects, 'dictionary_lsi_bow'), 'wb') as f:
         pickle.dump(dictionary, f)
 
     # create binary and regular bow corpus
-    corpus_bow     = [dictionary.doc2bow(d) for d in docs]
-    corpus_binary  = [[(i,1) for i,_ in d] for d in corpus_bow]
+    corpus_bow = [dictionary.doc2bow(d) for d in docs]
+    corpus_binary = [[(i, 1) for i, _ in d] for d in corpus_bow]
 
     # create tf-idf corpus
-    tfidf = TfidfModel(corpus_bow)
-    corpus_tfidf = tfidf[corpus_bow]
+    # tfidf = TfidfModel(corpus_bow)
+    # corpus_tfidf = tfidf[corpus_bow]
 
-    # save corpuses
-    with open(os.path.join(folder_path_objects, 'corpus_binary'), 'wb') as f:
-        pickle.dump(corpus_binary, f)
+    # # save corpuses
+    # with open(os.path.join(folder_path_objects, 'corpus_binary'), 'wb') as f:
+    #     pickle.dump(corpus_binary, f)
 
-    with open(os.path.join(folder_path_objects, 'corpus_tfidf'), 'wb') as f:
-        pickle.dump(corpus_tfidf, f)
-
+    # with open(os.path.join(folder_path_objects, 'corpus_tfidf'), 'wb') as f:
+    #     pickle.dump(corpus_tfidf, f)
 
     # create models
     print(f'{time.ctime()} Start training LSA (binary bow)')
     lsi_bin = LsiModel(
-        corpus = corpus_binary, 
-        id2word = dictionary,
-        num_topics = n_topics
+        corpus=corpus_binary,
+        id2word=dictionary,
+        chunksize=1000,
+        num_topics=n_topics
     )
 
     print(f'{time.ctime()} Start training LSA (tf-idf)')
     lsi_tfidf = LsiModel(
-        corpus = corpus_tfidf, 
-        id2word = dictionary,
-        num_topics = n_topics
+        corpus=corpus_tfidf,
+        id2word=dictionary,
+        num_topics=n_topics
     )
 
     print(f'{time.ctime()} Start training LDA (tf-idf)')
     lda_tfidf = LdaModel(
-        corpus = corpus_tfidf, 
-        id2word = dictionary,
-        num_topics = n_topics,
-        dtype = np.float64
+        corpus=corpus_tfidf,
+        id2word=dictionary,
+        num_topics=n_topics,
+        dtype=np.float64
     )
 
-    # save models to disk    
+    # save models to disk
     os.makedirs(folder_path_models, exist_ok=True)
-    filepath_out = lambda model: os.path.join('models', f'{model}_{t}')
+    # def filepath_out(model): return os.path.join('models', f'{model}_{t}')
 
-    lsi_bin.save(filepath_out('lsi_bin'))
-    lsi_tfidf.save(filepath_out('lsi_tfidf'))
-    lda_tfidf.save(filepath_out('lda_tfidf'))
+    lsi_bin.save('./models/lsi_bin_filtered')
+    # lsi_tfidf.save(filepath_out('lsi_tfidf'))
+    # lda_tfidf.save(filepath_out('lda_tfidf'))
 
 
 def create_index(model):
@@ -87,15 +88,12 @@ def create_index(model):
     m = get_model(model)
     dictionary = get_dictionary()
 
-    index = similarities.SparseMatrixSimilarity(m[corpus], num_features=len(dictionary.token2id))
+    index = similarities.SparseMatrixSimilarity(
+        m[corpus], num_features=len(dictionary.token2id))
 
     filepath_out = os.path.join(folder_path_objects, f'index_{model}')
 
     index.save(filepath_out)
-
-
-
-
 
 
 # helper functions
@@ -107,10 +105,12 @@ def get_index(model_type, num_topics):
     # else:
     #     corpus = get_corpus('binary')
 
-    filepath_in = os.path.join(folder_path_objects, f'index_{model_type}_{num_topics}')
+    filepath_in = os.path.join(
+        folder_path_objects, f'index_{model_type}_{num_topics}')
     index = similarities.MatrixSimilarity.load(filepath_in)
 
     return index
+
 
 def get_dictionary():
     with open(os.path.join(folder_path_objects, 'dictionary'), 'rb') as f:
@@ -123,6 +123,7 @@ def get_corpus(corpus):
     with open(os.path.join(folder_path_objects, f'corpus_{corpus}'), 'rb') as f:
         return pickle.load(f)
 
+
 def get_model(model, num_topics=500):
     assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
 
@@ -134,7 +135,6 @@ def get_model(model, num_topics=500):
         return LdaModel.load(filepath)
 
 
-
 class Search:
 
     def __init__(self, model, model_type, num_topics):
@@ -144,11 +144,7 @@ class Search:
         self.dictionary = get_dictionary()
         self.model = model
 
-
     def query(self, q):
-
-        # assert model in ['lsi_bin', 'lsi_tfidf', 'lda_tfidf']
-
 
         # get doc representation
         q = read_ap.process_text(q)
@@ -158,14 +154,11 @@ class Search:
 
         # convert vector to LSI space
         vec_query = self.model[q]
-        
+
         sims = self.index[vec_query]
 
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
-        
-        # for i, s in enumerate(sims):
-        #     print(s, documents[i])
-        
+
         return sims
 
 
@@ -177,11 +170,5 @@ if __name__ == '__main__':
 
     # create indices
     create_index('lsi_bin')
-    create_index('lsi_tfidf')
-    create_index('lda_tfidf')
-
-
-
-
-
-
+    # create_index('lsi_tfidf')
+    # create_index('lda_tfidf')
