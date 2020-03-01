@@ -2,8 +2,7 @@
 # from gensim.test.utils import common_texts
 # from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 import read_ap
-from gensim.models import LsiModel, LdaModel, TfidfModel
-
+from gensim.models import LsiModel, TfidfModel
 import os
 from collections import Counter
 import time
@@ -11,12 +10,13 @@ import read_ap
 from tqdm import tqdm
 import json
 import numpy as np
+from process_json import *
+
 # import lsa_lda_benchmark
 from gensim import corpora, similarities
 
 # initialize for gridsearch
-# vector_n_topics = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
-vector_n_topics = [5000, 10000]
+vector_n_topics = [10, 50, 100, 500, 1000, 2000, 5000, 10000]
 
 # create directories
 folder_path_models = 'models'
@@ -29,7 +29,7 @@ os.makedirs("models", exist_ok=True)
 
 # load documents
 docs = read_ap.get_processed_docs()
-docs = [d for i,d in docs.items()]
+docs = [d for i, d in docs.items()]
 dictionary = corpora.Dictionary(docs)
 
 # convert to TaggedDocuments so that gensim can work with them
@@ -44,9 +44,9 @@ for num_topics in vector_n_topics:
 
     print(f'{time.ctime()} Start training LSA (tf-idf) num_topics = {num_topics}')
     lsi_tfidf = LsiModel(
-        corpus = corpus_tfidf, 
-        id2word = dictionary,
-        num_topics = num_topics
+        corpus=corpus_tfidf,
+        id2word=dictionary,
+        num_topics=num_topics
     )
 
     # save model
@@ -59,14 +59,9 @@ for num_topics in vector_n_topics:
     )
 
     # save index
-    fp_index_out = os.path.join(folder_path_objects, f'index_lsi_tfidf_{num_topics}')
+    fp_index_out = os.path.join(
+        folder_path_objects, f'index_lsi_tfidf_{num_topics}')
     index.save(fp_index_out)
-
-
-
-
-
-
 
 
 print("Below the processed results from all the json files")

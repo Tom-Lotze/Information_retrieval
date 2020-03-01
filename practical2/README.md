@@ -22,9 +22,9 @@ Below, an overview is given of all files in this repo, and their function. The p
 
 ### Tuning and benchmarking
 - tune_gensim.py: Gridsearch on the vocabulary size, embedding dimension and window size, saves all the models
-- tune_lsa.py: Gridsearch on number of topics for the LSA model
-- lsa_lda_benchmark.py: 
-- lsa_benchmark.py: 
+- tune_lsa.py: Search for optimal number of topics for the LSA TFIDF model
+- lsa_tfidf_benchmark.py:
+- lsa_bow_benchmark:
 
 ### Analysis
 - process_json.py: Perform analysis on the json files (average MAP and nDCG for test and all queries per model) and significance testing (t-test) between the different models.
