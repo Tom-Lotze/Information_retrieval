@@ -21,14 +21,16 @@ Below, an overview is given of all files in this repo, and their function. The p
 ### Tuning and benchmarking
 - tune_gensim.py: Gridsearch on the vocabulary size, embedding dimension and window size, saves all the models
 - tune_lsa.py: Gridsearch on number of topics for the LSA model
-- lsa_lda_benchmark.py
+- lsa_lda_benchmark.py: 
+- lsa_benchmark.py: 
 
 ### Analysis
 - process_json.py: Perform analysis on the json files (average MAP and nDCG for test and all queries per model) and significance testing (t-test) between the different models.
 - query_analysis.py: finding the variance in query performance and best and worst performing queries per model.
 - result_files.py: creates the TREC style result files
+- lsa_lda_analysis.ipynb: extracting the topics from the LSI model
 
-## plotting
+## Plotting
 - plot_gensim.py: plot MAP of gridsearch models for Doc2Vec
 - plot_LSI.py: plot the MAP results of various number of topics for LSI
 
