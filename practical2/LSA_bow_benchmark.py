@@ -42,5 +42,5 @@ metrics = evaluator.evaluate(overall_ser)
 
 # dump this to JSON
 # *Not* Optional - This is submitted in the assignment!
-with open(f"./json_files/LSI_500.json", "w") as writer:
+with open(f"./json_files/LSI_bow.json", "w") as writer:
     json.dump(metrics, writer, indent=1)
