@@ -4,12 +4,12 @@ import read_ap
 import time
 import os
 import pickle
-import numpy as np
 
 # constants
 folder_path_models = 'models'
 folder_path_objects = 'objects'
 folder_path_results = 'results'
+
 num_topics = 500
 
 os.makedirs(folder_path_models, exist_ok=True)
@@ -65,7 +65,7 @@ def create_index(model):
     index = similarities.SparseMatrixSimilarity(
         m[corpus], num_features=len(dictionary.token2id))
 
-    filepath_out = os.path.join(folder_path_objects, f'index_{model}')
+    filepath_out = os.path.join(folder_path_objects, f'index_lsi_bin')
 
     index.save(filepath_out)
 
@@ -75,14 +75,14 @@ def get_index(model_type, num_topics):
     assert model_type in ['lsi_bin']
 
     filepath_in = os.path.join(
-        folder_path_objects, f'index_{model_type}_{num_topics}')
+        folder_path_objects, f'index_model_lsi_bin')
     index = similarities.MatrixSimilarity.load(filepath_in)
 
     return index
 
 
 def get_dictionary():
-    with open(os.path.join(folder_path_objects, 'dictionary'), 'rb') as f:
+    with open(os.path.join(folder_path_objects, 'dictionary_lsi_bow'), 'rb') as f:
         return pickle.load(f)
 
 
@@ -94,7 +94,7 @@ def get_corpus(corpus):
 def get_model(model, num_topics=500):
     assert model in ['lsi_bin']
 
-    filepath = os.path.join(folder_path_models, f'lsi_bin_{num_topics}')
+    filepath = os.path.join(folder_path_models, f'lsi_bin_filtered')
 
     return LsiModel.load(filepath)
 
@@ -116,8 +116,6 @@ class Search:
         q = read_ap.process_text(q)
         q = self.dictionary.doc2bow(q)
 
-        #print(f"q is : {q}")
-
         # convert vector to LSI space
         vec_query = self.model[q]
 
@@ -129,7 +127,6 @@ class Search:
 
 
 if __name__ == '__main__':
-    t = int(time.time())
 
     # train models
     train(n_topics=500)

@@ -15,7 +15,6 @@ Below, an overview is given of all files in this repo, and their function. The p
 - tf_idf.py
 - skipgram.py - word2vec model (called from main.py)
 - gensim_doc2vec.py
-- lsa_lda.py (LSA TFIDF models) - old file, now splitted in two
 - lsa_bow.py - LSA for binary BOW
 - lsa_tfidf.py - LSA for TFIDF
 - lda_bow_kl_div.py - LDA model with BOW and KL divergence ranking and pytrec eval
@@ -23,8 +22,8 @@ Below, an overview is given of all files in this repo, and their function. The p
 ### Tuning and benchmarking
 - tune_gensim.py: Gridsearch on the vocabulary size, embedding dimension and window size, saves all the models
 - tune_lsa.py: Search for optimal number of topics for the LSA TFIDF model
-- lsa_tfidf_benchmark.py:
-- lsa_bow_benchmark:
+- lsa_tfidf_benchmark.py: benchmark test for various number of topic LSA TF-IDF
+- lsa_bow_benchmark: benchmark test for the one LSA BoW model
 
 ### Analysis
 - process_json.py: Perform analysis on the json files (average MAP and nDCG for test and all queries per model) and significance testing (t-test) between the different models.

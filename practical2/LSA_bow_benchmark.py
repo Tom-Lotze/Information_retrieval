@@ -1,16 +1,12 @@
 from gensim.models import LsiModel
 import download_ap
 import read_ap
-import trec
 from tqdm import tqdm
-import lsa_lda
+import lsa_bow
 import pytrec_eval
 import json
-import os
+
 import numpy as np
-import lsa_bow
-
-
 
 # ensure dataset is downloaded
 download_ap.download_dataset()
@@ -23,32 +19,28 @@ idx2key = {i: key for i, key in enumerate(docs_by_id.keys())}
 # read in the qrels
 qrels, queries = read_ap.read_qrels()
 
-
-
 model = LsiModel.load(f"./models/lsi_bin_filtered")
 print("loaded model succesfully")
 
 # load model
-search_engine = lsa_bow.Search(model=model, model_type="lsi_bin", num_topics=500)
+search_engine = lsa_bow.Search(
+    model=model, model_type="lsi_bin", num_topics=500)
 # collect results
 overall_ser = {}
-for qid in tqdm(qrels): 
+for qid in tqdm(qrels):
     query_text = queries[qid]
     results = search_engine.query(query_text)
-    #print(dict([(idx2key[idx], score) for idx, score in results]))
-    overall_ser[qid] = dict([(idx2key[idx], float(score)) for idx, score in results])
-    
-    
+
+    overall_ser[qid] = dict(
+        [(idx2key[idx], np.float64(score)) for idx, score in results])
 
 # run evaluation with `qrels` as the ground truth relevance judgements
-# here, we are measuring MAP and NDCG, but this can be changed to 
+# here, we are measuring MAP and NDCG, but this can be changed to
 # whatever you prefer
 evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})
 metrics = evaluator.evaluate(overall_ser)
 
 # dump this to JSON
 # *Not* Optional - This is submitted in the assignment!
-with open(f"./json_files/LSI_BOW.json", "w") as writer:
+with open(f"./json_files/LSI_500.json", "w") as writer:
     json.dump(metrics, writer, indent=1)
-
-
