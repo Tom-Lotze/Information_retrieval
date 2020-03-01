@@ -269,6 +269,11 @@ def get_batches(model, docs, batch_size, pdf):
 
 
 def train_skipgram(model, docs):
+    ''' train skipgram model'''
+
+    torch.manual_seed(42)
+    np.random.seed(42)
+
     # set optimizer HYPERPARAMS?
     optimizer = optim.SparseAdam(model.parameters())
 
