@@ -28,14 +28,14 @@ class Skipgram(nn.Module):
         super(Skipgram, self).__init__()
 
         # set tunable parameters
-        self.embedding_dim = embedding_dim
-        self.window_size = 5
-        self.nr_epochs = 1
-        self.k = 5
+        self.embedding_dim = embedding_dim  # word embedding dim
+        self.window_size = window_size  # window size
+        self.nr_epochs = 1  # num of epochs to train
+        self.k = 5  # num negative samples per positive example
+        self.counter = counter  # word counter file
 
-        self.counter = counter
-
-        # vocab needs to be made and filtered on infrequent words
+        # vocab is an input arg and needs to be made and filtered on
+        # infrequent words
         self.docs = docs
         self.vocab = vocab
         self.inv_vocab = {v: k for k, v in vocab.items()}
@@ -273,7 +273,7 @@ def train_skipgram(model, docs):
     optimizer = optim.SparseAdam(model.parameters())
 
     # batch size
-    batch_size = 256
+    batch_size = 512
 
     # get pdf for negative sampling
     pdf = model.get_neg_sample_pdf(model.counter)
@@ -317,8 +317,10 @@ def train_skipgram(model, docs):
 
 
 def benchmark(model):
+    # get queries
     qrels, queries = read_qrels()
 
+    # overall ser dict
     overall_ser = {}
 
     # Adopted version from the TFIDF benchmark test

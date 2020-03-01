@@ -17,11 +17,11 @@ import numpy as np
 # initialize for gridsearch
 vector_dimensions = [200, 300, 400, 500]
 window_sizes = [5, 10, 15, 20]
-vocab_sizes = [10, 25, 50, 100, 200] * 1000
+min_counts = [250, 50, 15, 5, 2]
 
 default_window_size = 5
 default_vector_dim = 300
-default_vocab_size = 25000
+default_min_count = 50
 
 # create directories
 os.makedirs("json_files", exist_ok=True)
@@ -42,7 +42,7 @@ print(f"{len(docs)} docs are loaded")
 # vector dimensions
 for vec_dim in vector_dimensions:
     print(f"\nvec_dim: {vec_dim}")
-    model, model_name = training(documents, max_vocab_size=default_vocab_size,
+    model, model_name = training(documents, default_min_count,
                                  vector_dim=vec_dim, window_size=default_window_size)
 
     if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
@@ -51,16 +51,16 @@ for vec_dim in vector_dimensions:
         # window sizes
 for win_size in window_sizes:
     print(f"\nwindow size: {win_size}")
-    model, model_name = training(documents, max_vocab_size=default_vocab_size,
+    model, model_name = training(documents, default_min_count,
                                  vector_dim=default_vector_dim, window_size=win_size)
 
     if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
         _ = benchmark(model, model_name, docs, idx2key)
 
 
-for max_vocab in vocab_sizes:
-    print(f"\nmax voab size: {max_vocab}")
-    model, model_name = training(documents, max_vocab_size=max_vocab,
+for min_c in min_counts:
+    print(f"\nmax min count: {min_c}")
+    model, model_name = training(documents, min_c,
                                  vector_dim=default_vector_dim, window_size=default_window_size)
 
     if not os.path.isfile(f"./json_files/benchmark_{model_name}.json"):
