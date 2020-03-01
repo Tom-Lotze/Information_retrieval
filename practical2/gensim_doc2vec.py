@@ -80,6 +80,8 @@ def benchmark(model, model_name, docs, idx2key):
         results = rank(model, docs, query_text) 
         #print(results)
         overall_ser[qid] = dict([(idx2key[idx], score) for idx, score in results])
+        
+    print(overall_ser)
 
     #print(overall_ser[100])
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg'})

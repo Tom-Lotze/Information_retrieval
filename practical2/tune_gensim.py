@@ -19,6 +19,7 @@ vector_dimensions = [200, 300, 400, 500]
 window_sizes = [5, 10, 15, 20]
 min_counts = [250, 50, 15, 5, 2]
 
+
 default_window_size = 5
 default_vector_dim = 300
 default_min_count = 50
