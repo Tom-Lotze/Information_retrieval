@@ -15,10 +15,10 @@ Below, an overview is given of all files in this repo, and their function. The p
 - tf_idf.py
 - skipgram.py - word2vec model (called from main.py)
 - gensim_doc2vec.py
-- lsa_bow.py
-- lsa_lda.py (LSA TFIDF models) - NEEDS TO BE RENAMED TO LSA ONLY
-- lsa_tfidf.py
-- lda_bow_kl_div.py - LDA model with BOW and KL divergence ranking
+- lsa_lda.py (LSA TFIDF models) - old file, now splitted in two
+- lsa_bow.py - LSA for binary BOW
+- lsa_tfidf.py - LSA for TFIDF
+- lda_bow_kl_div.py - LDA model with BOW and KL divergence ranking and pytrec eval
 
 ### Tuning and benchmarking
 - tune_gensim.py: Gridsearch on the vocabulary size, embedding dimension and window size, saves all the models
@@ -37,9 +37,9 @@ Below, an overview is given of all files in this repo, and their function. The p
 - plot_LSI.py: plot the MAP results of various number of topics for LSI
 
 ## Subfolders
-- datasets
-- objects
-- models
+- datasets 
+- objects - used for storing dictionaries/corpora/etc
+- models - used for storing trained models
 - json_files: JSON files with the 
 - results: TREC style result files
 
