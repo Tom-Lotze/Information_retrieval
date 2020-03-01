@@ -34,7 +34,7 @@ def process_json():
         print(f"avg_map_all: {avg_map_all:.4f}")
         print(f"avg_map_76-100: {avg_map_76_100:.4f}")
         print(f"avg_ndcg_all: {avg_ndcg_all:.4f}")
-        print(f"avg_map_76-100: {avg_ndcg_76_100:.4f}")
+        print(f"avg_ndcg_76-100: {avg_ndcg_76_100:.4f}")
 
 
 
