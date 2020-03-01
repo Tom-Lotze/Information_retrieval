@@ -73,8 +73,6 @@ def create_index(model):
 # helper functions
 def get_index(model_type, num_topics):
 
-    # corpus = get_corpus('tfidf')
-
     filepath_in = os.path.join(
         folder_path_objects, f'index_{model_type}_{num_topics}')
     index = similarities.MatrixSimilarity.load(filepath_in)
@@ -114,8 +112,6 @@ class Search:
         # get doc representation
         q = read_ap.process_text(q)
         q = self.dictionary.doc2bow(q)
-
-        # print(f"q is : {q}")
 
         # convert vector to LSI space
         vec_query = self.model[q]
