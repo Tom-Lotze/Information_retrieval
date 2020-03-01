@@ -5,7 +5,13 @@ from scipy.stats import ttest_rel
 from itertools import combinations
 
 def process_json():
-    curr_path = os.path.join(os.getcwd(), "json_files/")
+   
+    gridsearch = ""
+     # comment the line below to get the normal result, 
+     # uncomment to get the gridsearch results
+    gridsearch = "gridsearch_models"
+
+    curr_path = os.path.join(os.getcwd(), "json_files/"+gridsearch)
 
     json_files = [file for file in os.listdir(curr_path) if file.endswith(".json")]
     #print(json_files)
@@ -13,7 +19,7 @@ def process_json():
 
     for file in json_files:
         print("\n"+file)
-        with open(os.path.join("json_files", file)) as f:
+        with open(os.path.join(curr_path, file)) as f:
             scores_dict = json.load(f)
         scores[file] = scores_dict
         avg_map_all = np.mean([scores_dict[query_scores]["map"] for query_scores in 
@@ -39,13 +45,6 @@ def process_json():
         second_scores = sum([[qr["map"], qr["ndcg"]] for qr in scores[key2].values()], [])
         print(f"\nT-test between {key1} and {key2}: {ttest_rel(first_scores, second_scores)}")
 
-    # compute t-test for following models
-    # word2vec-doc2vec
-    # word2vec-LSI
-    # word2vec-LDA
-    # doc2vec-LSI
-    # doc2vec-LDA
-    # LSI-LDA
 
     return 0
 
