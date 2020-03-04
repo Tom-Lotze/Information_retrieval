@@ -1,3 +1,4 @@
+
 import os
 import gc
 import json
@@ -75,11 +76,11 @@ class DataSet(object):
                  num_rel_labels,
                  num_features,
                  num_nonzero_feat,
+                 already_normalized=False,
                  store_pickle_after_read=True,
                  read_from_pickle=True,
                  feature_normalization=True,
-                 purge_test_set=True,
-                 already_normalized=False):
+                 purge_test_set=True):
         self.name = name
         self.num_rel_labels = num_rel_labels
         self.num_features = num_features
@@ -148,7 +149,6 @@ class DataFoldSplit(object):
             doc_str += '%s:%f ' % (
                 self.datafold.feature_map[f_i], doc_feat[f_i])
         return doc_str
-
 
 
 class DataFold(object):
