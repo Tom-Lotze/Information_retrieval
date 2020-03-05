@@ -35,6 +35,7 @@ class Pointwise(nn.Module):
 
         # set non-linearity
         self.relu = nn.ReLU()
+        self.softmax = nn.Softmax(dim=0)
 
         # add linear layers
         layer_list = [nn.Linear(n_inputs, n_hidden[0])]
@@ -50,16 +51,19 @@ class Pointwise(nn.Module):
 
 
     def forward(self, x):
-        for layer in self.layers:
+        for layer in self.layers[:-1]:
             x = layer(x)
             x = self.relu(x)
 
-        return x
+        out = self.layers[-1](x)
+        #out = self.softmax(x)
+
+        return out
 
 
     def evaluate_on_validation(self, data):
         averages = []
-        validation_data_generator = DataLoader(data.validation, batch_size=512, drop_last=True)
+        validation_data_generator = DataLoader(data.validation, batch_size=2042, drop_last=True)
 
         for step, (x_valid, y_valid) in enumerate(
                         validation_data_generator):
@@ -79,8 +83,12 @@ class Pointwise(nn.Module):
         predictions = predictions.argmax(dim=1)
         total_correct = torch.sum(predictions == labels).item()
         accuracy = total_correct / batch_size
+        print(f"total_correct: {total_correct}, batch_size: {batch_size}")
 
         return accuracy
+
+    def ndcg(self, ranking):
+        pass
 
 
 
