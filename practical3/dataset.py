@@ -1,4 +1,3 @@
-
 import os
 import gc
 import json
@@ -17,36 +16,6 @@ def _add_zero_to_vector(vector):
     return np.concatenate([np.zeros(1, dtype=vector.dtype), vector])
 
 
-def get_dataset_from_json_info(
-        dataset_name,
-        info_path,
-        store_pickle_after_read=True,
-        read_from_pickle=True,
-        feature_normalization=True,
-        purge_test_set=True):
-    with open(info_path) as f:
-        all_info = json.load(f)
-    assert dataset_name in all_info, 'Dataset: %s not found in info file: %s' % (
-        dataset_name, all_info.keys())
-
-    set_info = all_info[dataset_name]
-    assert set_info['num_folds'] == len(
-        set_info['fold_paths']), 'Missing fold paths for %s' % dataset_name
-
-    if feature_normalization:
-        num_feat = set_info['num_unique_feat']
-    else:
-        num_feat = set_info['num_nonzero_feat']
-
-    return DataSet(dataset_name,
-                   set_info['fold_paths'],
-                   set_info['num_relevance_labels'],
-                   num_feat,
-                   set_info['num_nonzero_feat'],
-                   already_normalized=set_info['query_normalized']
-                   )
-
-
 def get_dataset(num_folds=1,
                 num_relevance_labels=5,
                 num_nonzero_feat=519,
@@ -60,7 +29,7 @@ def get_dataset(num_folds=1,
         num_relevance_labels,
         num_unique_feat,
         num_nonzero_feat,
-        query_normalized
+        already_normalized=query_normalized,
     )
 
 
@@ -76,11 +45,11 @@ class DataSet(object):
                  num_rel_labels,
                  num_features,
                  num_nonzero_feat,
-                 already_normalized=False,
                  store_pickle_after_read=True,
                  read_from_pickle=True,
                  feature_normalization=True,
-                 purge_test_set=True):
+                 purge_test_set=True,
+                 already_normalized=False):
         self.name = name
         self.num_rel_labels = num_rel_labels
         self.num_features = num_features
@@ -149,6 +118,7 @@ class DataFoldSplit(object):
             doc_str += '%s:%f ' % (
                 self.datafold.feature_map[f_i], doc_feat[f_i])
         return doc_str
+
 
 
 class DataFold(object):
