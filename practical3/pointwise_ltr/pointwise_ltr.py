@@ -6,7 +6,6 @@ import sys
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 
-
 sys.path.append('..')
 sys.path.append(".")
 
@@ -17,8 +16,7 @@ import dataset
 
 class Pointwise(nn.Module):
     """
-
-
+    Model class for the pointwise ranking model
     """
     def __init__(self, n_inputs, n_hidden, n_outputs=1):
         """
@@ -30,10 +28,12 @@ class Pointwise(nn.Module):
         """
         super(Pointwise, self).__init__()
 
+        # initialize parameters
         self.n_inputs = n_inputs
         self.n_hidden = n_hidden
         self.n_outputs = n_outputs
 
+        # set non-linearity
         self.relu = nn.ReLU()
 
         # add linear layers
@@ -46,7 +46,7 @@ class Pointwise(nn.Module):
         self.layers = nn.ModuleList(layer_list)
 
         print(self.layers)
-        
+
 
 
     def forward(self, x):
@@ -55,7 +55,6 @@ class Pointwise(nn.Module):
             x = self.relu(x)
 
         return x
-
 
 
     def evaluate_on_validation(self, x_valid, y_valid):
@@ -67,16 +66,12 @@ class Pointwise(nn.Module):
         pass
 
 
-
-
-
 # helper functions
 def weights_init(model):
     if isinstance(model, nn.Linear):
         nn.init.xavier_uniform_(model.weight.data)
         if model.bias is not None:
             torch.nn.init.zeros_(model.bias)
-
 
 # train function
 def train(data):
@@ -92,7 +87,7 @@ def train(data):
     optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
 
     #x_train, y_train = data.train.feature_matrix, data.train.label_vector
-        
+
     #training_set = Dataset(partition['train'], labels)
     training_data_generator = DataLoader(data.train, batch_size=1024, shuffle=True, drop_last=True)
 
@@ -110,8 +105,8 @@ def train(data):
         print(f"Epoch: {epoch}")
         for step, (x, y) in enumerate(training_data_generator):
             x, y = x.float().to(device), Variable(y).to(device)
-            print(y)
-            
+            print(max(y))
+
 
             print(f"x: {x.shape}, y:{y.shape}")
 
@@ -139,7 +134,6 @@ def train(data):
             torch.save(model.state_dict(), f)
 
         # run on test set
-        
 
 
 
@@ -159,7 +153,7 @@ if __name__ == "__main__":
     print('Number of queries in test set: %d' % data.test.num_queries())
     print('Number of documents in test set: %d' % data.test.num_docs())
 
-    
+
     train(data)
 
 
