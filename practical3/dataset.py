@@ -119,6 +119,15 @@ class DataFoldSplit(object):
                 self.datafold.feature_map[f_i], doc_feat[f_i])
         return doc_str
 
+    # added by tom
+    def __len__(self):
+        return self.num_docs()
+
+    def __getitem__(self, index):
+        doc = self.feature_matrix[index]
+        label = self.label_vector[index]
+        return doc, label
+
 
 
 class DataFold(object):
