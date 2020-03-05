@@ -5,10 +5,8 @@ import os
 import sys
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
-
 sys.path.append('..')
 sys.path.append(".")
-
 import dataset
 #import ranking
 #import evaluate
@@ -18,7 +16,7 @@ class Pointwise(nn.Module):
     """
     Model class for the pointwise ranking model
     """
-    def __init__(self, n_inputs, n_hidden, n_outputs=1):
+    def __init__(self, n_inputs, n_hidden, n_outputs=5):
         """
         Model that takes an input feature vector x and tries to predict the relevance score
         Input arguments:
@@ -32,6 +30,8 @@ class Pointwise(nn.Module):
         self.n_inputs = n_inputs
         self.n_hidden = n_hidden
         self.n_outputs = n_outputs
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
         # set non-linearity
         self.relu = nn.ReLU()
@@ -57,13 +57,31 @@ class Pointwise(nn.Module):
         return x
 
 
-    def evaluate_on_validation(self, x_valid, y_valid):
-        model.eval()
-        pass
+    def evaluate_on_validation(self, data):
+        averages = []
+        validation_data_generator = DataLoader(data.validation, batch_size=512, drop_last=True)
+
+        for step, (x_valid, y_valid) in enumerate(
+                        validation_data_generator):
+            x_valid, y_valid = x_valid.float().to(self.device), Variable(y_valid).to(self.device)
+            predictions = self.forward(x_valid)
+
+            averages.append(self.accuracy(predictions, y_valid))
+
+        return np.mean(averages)
 
     def evaluate_on_test(self, x_test, y_test):
         model.eval()
         pass
+
+    def accuracy(self, predictions, labels):
+        batch_size = labels.shape[0]
+        predictions = predictions.argmax(dim=1)
+        total_correct = torch.sum(predictions == labels).item()
+        accuracy = total_correct / batch_size
+
+        return accuracy
+
 
 
 # helper functions
@@ -75,7 +93,9 @@ def weights_init(model):
 
 # train function
 def train(data):
-    model = Pointwise(data.num_features, [512, 256, 128, 64, 8], 1)
+    #model = Pointwise(data.num_features, [512, 256, 128, 64, 8])
+    n_hidden = [512, 128, 8]
+    model = Pointwise(data.num_features, n_hidden, n_outputs=5)
     model.apply(weights_init)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -83,61 +103,56 @@ def train(data):
 
     nr_epochs = 40
 
-    criterion = nn.MSELoss()
+    criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
 
-    #x_train, y_train = data.train.feature_matrix, data.train.label_vector
-
-    #training_set = Dataset(partition['train'], labels)
-    training_data_generator = DataLoader(data.train, batch_size=1024, shuffle=True, drop_last=True)
-
-    #validation_set = Dataset(partition['validation'], labels)
-    #validation_generator = data.DataLoader(validation_set, **params)
+    training_data_generator = DataLoader(data.train, batch_size=512, shuffle=True, drop_last=True, num_workers = 4)
 
     model.to(device)
-    model.train()
+
 
     training_losses = []
 
-    #print(f"xtrain shape: {x_train.shape}, labels: {y_train}")
-
     for epoch in range(nr_epochs):
         print(f"Epoch: {epoch}")
+        model.train()
+
         for step, (x, y) in enumerate(training_data_generator):
             x, y = x.float().to(device), Variable(y).to(device)
-            print(max(y))
 
-
-            print(f"x: {x.shape}, y:{y.shape}")
-
-            break
+            # reset the optimizer and perform forward pass
             optimizer.zero_grad()
-
             predictions = model(x)
 
-            print(predictions.shape)
-
-            loss = criterion(predictions, y.float())
-
+            # compute the loss and backpropagate
+            loss = criterion(predictions, y)
             loss.backward()
             optimizer.step()
 
             loss_item = loss.item()
             training_losses.append(loss_item)
             if step % 100 == 0:
-                print(f"Step: {step}: {loss_item:.4f}")
+                print(f"Step: {step}: Loss: {loss_item:.4f}")
 
-        break
 
-        # save model
-        with open(f"./pointwise_ltr/models/pointwise.pt", "wb") as f:
-            torch.save(model.state_dict(), f)
+        # save mode
+        filename = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}.pt"
+        torch.save(model.state_dict(), filename)
+        print(f"Model is saved as {filename}")
 
-        # run on test set
+        # run on validation set
+        model.eval()
+        accuracy_valid = model.evaluate_on_validation(data)
+        print(f"validation accuracy: {accuracy_valid}")
+
 
 
 
 if __name__ == "__main__":
+    np.random.seed(42)
+    torch.manual_seed(42)
+
+
     # import the data
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
