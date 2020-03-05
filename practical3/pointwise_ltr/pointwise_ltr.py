@@ -135,7 +135,7 @@ def train(data):
         break
 
         # save model
-        with open(f"./pointwise/models/pointwise.pt", "wb") as f:
+        with open(f"./pointwise_ltr/models/pointwise.pt", "wb") as f:
             torch.save(model.state_dict(), f)
 
         # run on test set
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
 
-    os.makedirs("pointwise/models", exist_ok=True)
+    os.makedirs("pointwise_ltr/models", exist_ok=True)
 
 
     print('Number of features: %d' % data.num_features)
