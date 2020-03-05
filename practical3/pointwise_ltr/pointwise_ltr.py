@@ -3,6 +3,9 @@ import torch.nn as nn
 import numpy as np
 import os
 import sys
+from torch.utils.data import DataLoader
+from torch.autograd import Variable
+
 
 sys.path.append('..')
 sys.path.append(".")
@@ -36,7 +39,7 @@ class Pointwise(nn.Module):
         # add linear layers
         layer_list = [nn.Linear(n_inputs, n_hidden[0])]
         if len(n_hidden) > 1:
-            for i, n_hid in enumerate(n_hidden[1:]):
+            for i, n_hid in enumerate(n_hidden[1:], start=1):
                 layer_list.append(nn.Linear(n_hidden[i-1], n_hid))
         layer_list.append(nn.Linear(n_hidden[-1], n_outputs))
 
@@ -47,19 +50,20 @@ class Pointwise(nn.Module):
 
 
     def forward(self, x):
-        for layer in self.layers():
+        for layer in self.layers:
             x = layer(x)
             x = self.relu(x)
-
 
         return x
 
 
 
     def evaluate_on_validation(self, x_valid, y_valid):
+        model.eval()
         pass
 
     def evaluate_on_test(self, x_test, y_test):
+        model.eval()
         pass
 
 
@@ -79,15 +83,63 @@ def train(data):
     model = Pointwise(data.num_features, [512, 256, 128, 64, 8], 1)
     model.apply(weights_init)
 
-    criterion = nn.CrossEntropyLoss()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Device: {device}")
+
+    nr_epochs = 40
+
+    criterion = nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
 
-    x_train, y_train = data.train.feature_matrix, data.train.label_vector
+    #x_train, y_train = data.train.feature_matrix, data.train.label_vector
+        
+    #training_set = Dataset(partition['train'], labels)
+    training_data_generator = DataLoader(data.train, batch_size=1024, shuffle=True, drop_last=True)
 
-    print(f"xtrain shape: {x_train.shape}, labels: {y_train.shape}")
+    #validation_set = Dataset(partition['validation'], labels)
+    #validation_generator = data.DataLoader(validation_set, **params)
 
+    model.to(device)
+    model.train()
 
+    training_losses = []
 
+    #print(f"xtrain shape: {x_train.shape}, labels: {y_train}")
+
+    for epoch in range(nr_epochs):
+        print(f"Epoch: {epoch}")
+        for step, (x, y) in enumerate(training_data_generator):
+            x, y = x.float().to(device), Variable(y).to(device)
+            print(y)
+            
+
+            print(f"x: {x.shape}, y:{y.shape}")
+
+            break
+            optimizer.zero_grad()
+
+            predictions = model(x)
+
+            print(predictions.shape)
+
+            loss = criterion(predictions, y.float())
+
+            loss.backward()
+            optimizer.step()
+
+            loss_item = loss.item()
+            training_losses.append(loss_item)
+            if step % 100 == 0:
+                print(f"Step: {step}: {loss_item:.4f}")
+
+        break
+
+        # save model
+        with open(f"./pointwise/models/pointwise.pt", "wb") as f:
+            torch.save(model.state_dict(), f)
+
+        # run on test set
+        
 
 
 
@@ -95,6 +147,8 @@ if __name__ == "__main__":
     # import the data
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
+
+    os.makedirs("pointwise/models", exist_ok=True)
 
 
     print('Number of features: %d' % data.num_features)
