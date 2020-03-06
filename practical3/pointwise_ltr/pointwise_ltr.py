@@ -9,7 +9,7 @@ sys.path.append('..')
 sys.path.append(".")
 import dataset
 #import ranking
-#import evaluate
+import evaluate as evl
 
 
 class Pointwise(nn.Module):
@@ -35,7 +35,7 @@ class Pointwise(nn.Module):
 
         # set non-linearity
         self.relu = nn.ReLU()
-        self.softmax = nn.Softmax(dim=0)
+        self.softmax = nn.Softmax(dim=1)
 
         # add linear layers
         layer_list = [nn.Linear(n_inputs, n_hidden[0])]
@@ -47,7 +47,6 @@ class Pointwise(nn.Module):
         self.layers = nn.ModuleList(layer_list)
 
         print(self.layers)
-
 
 
     def forward(self, x):
@@ -62,33 +61,43 @@ class Pointwise(nn.Module):
 
 
     def evaluate_on_validation(self, data):
-        averages = []
-        validation_data_generator = DataLoader(data.validation, batch_size=2042, drop_last=True)
+        with torch.no_grad():
+            averages = []
+            predictions_list = []
 
-        for step, (x_valid, y_valid) in enumerate(
-                        validation_data_generator):
-            x_valid, y_valid = x_valid.float().to(self.device), Variable(y_valid).to(self.device)
-            predictions = self.forward(x_valid)
+            validation_data_generator = DataLoader(data.validation, batch_size=2042, shuffle=False, drop_last=False)
 
-            averages.append(self.accuracy(predictions, y_valid))
+            for step, (x_valid, y_valid) in enumerate(
+                            validation_data_generator):
+                x_valid, y_valid = x_valid.float().to(self.device), Variable(y_valid).to(self.device)
+                logits = self.forward(x_valid)
+                predictions = np.argmax(logits, axis=1)
+                predictions_list.extend(list(predictions))
 
-        return np.mean(averages)
+            results = evl.evaluate(data.validation, np.array(predictions_list), print_results=True)
+
+        return results
+
+
 
     def evaluate_on_test(self, x_test, y_test):
         model.eval()
         pass
+
+
 
     def accuracy(self, predictions, labels):
         batch_size = labels.shape[0]
         predictions = predictions.argmax(dim=1)
         total_correct = torch.sum(predictions == labels).item()
         accuracy = total_correct / batch_size
-        print(f"total_correct: {total_correct}, batch_size: {batch_size}")
+        # print(f"total_correct: {total_correct}, batch_size: {batch_size}")
 
         return accuracy
 
-    def ndcg(self, ranking):
-        pass
+
+    def ndcg(self, predictions, labels, k=10):
+        return evl.ndcg_at_k(sorted_labels, ideal_labels, k)
 
 
 
@@ -110,16 +119,17 @@ def train(data):
     print(f"Device: {device}")
 
     nr_epochs = 40
+    learning_rate = 0.01
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.005)
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
     training_data_generator = DataLoader(data.train, batch_size=512, shuffle=True, drop_last=True, num_workers = 4)
 
     model.to(device)
 
-
     training_losses = []
+    validation_results = {}
 
     for epoch in range(nr_epochs):
         print(f"Epoch: {epoch}")
@@ -143,17 +153,16 @@ def train(data):
                 print(f"Step: {step}: Loss: {loss_item:.4f}")
 
 
+
         # save mode
-        filename = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}.pt"
+        filename = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{learning_rate}.pt"
         torch.save(model.state_dict(), filename)
         print(f"Model is saved as {filename}")
 
         # run on validation set
         model.eval()
-        accuracy_valid = model.evaluate_on_validation(data)
-        print(f"validation accuracy: {accuracy_valid}")
-
-
+        results_validation = model.evaluate_on_validation(data)
+        validation_results[epoch] = results_validation
 
 
 if __name__ == "__main__":
