@@ -21,6 +21,8 @@ def evaluate_query(data_split, qid, all_scores):
   return evaluate_labels_scores(q_labels, q_scores)
 
 def evaluate_labels_scores(labels, scores):
+  #print(labels)
+  #print(scores)
   n_docs = labels.shape[0]
 
   random_i = np.random.permutation(
@@ -59,7 +61,7 @@ def evaluate_labels_scores(labels, scores):
       'dcg@05': dcg_at_k(sorted_labels, 5),
       'dcg@10': dcg_at_k(sorted_labels, 10),
       'dcg@20': dcg_at_k(sorted_labels, 20),
-      'ndcg': ndcg_at_k(sorted_labels, ideal_labels, 0),
+      'w': ndcg_at_k(sorted_labels, ideal_labels, 0),
       'ndcg@03': ndcg_at_k(sorted_labels, ideal_labels, 3),
       'ndcg@05': ndcg_at_k(sorted_labels, ideal_labels, 5),
       'ndcg@10': ndcg_at_k(sorted_labels, ideal_labels, 10),
@@ -97,8 +99,8 @@ def evaluate(data_split, all_scores, print_results=False):
   for qid in np.arange(data_split.num_queries()):
     if included(qid, data_split):
       add_to_results(results, evaluate_query(data_split, qid, all_scores))
-
-  print('"metric": "mean" ("standard deviation")')
+  if print_results:
+    print('"metric": "mean" ("standard deviation")')
   mean_results = {}
   for k in sorted(results.keys()):
     v = results[k]
