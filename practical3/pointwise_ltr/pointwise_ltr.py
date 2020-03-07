@@ -130,7 +130,7 @@ def train(data, FLAGS):
     # init results lists
     training_losses = []
     validation_results = {}
-    filename_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{learning_rate}.json"
+    filename_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}.json"
 
     model.to(device)
 
@@ -158,7 +158,7 @@ def train(data, FLAGS):
 
         # save model
         if epoch % 5 == 0 and epoch != 0:
-            filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{learning_rate}.pt"
+            filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt"
             torch.save(model.state_dict(), filename_model)
             print(f"Model is saved as {filename_model}")
 
