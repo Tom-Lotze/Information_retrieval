@@ -113,32 +113,32 @@ def weights_init(model):
 
 # train function
 def train(data, FLAGS):
-    #model = Pointwise(data.num_features, [512, 256, 128, 64, 8])
+    # initialize model
     n_hidden = [int(n_h) for n_h in FLAGS.hidden_units.split(",")]
     model = Pointwise(data.num_features, n_hidden, n_outputs=5)
     model.apply(weights_init)
-
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(f"Device: {device}")
-
-    nr_epochs = 40
-    learning_rate = 0.01
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=FLAGS.learning_rate)
 
     training_data_generator = DataLoader(data.train, batch_size=FLAGS.batch_size, shuffle=True, drop_last=True, num_workers = 4)
 
-    model.to(device)
+    # set device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print(f"Device: {device}")
 
+    # init results lists
     training_losses = []
     validation_results = {}
     filename_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{learning_rate}.json"
+
+    model.to(device)
 
     for epoch in range(FLAGS.max_epochs):
         print(f"Epoch: {epoch}")
         model.train()
 
+        # iterate over batches
         for step, (x, y) in enumerate(training_data_generator):
             x, y = x.float().to(device), Variable(y).to(device)
 
@@ -150,13 +150,11 @@ def train(data, FLAGS):
             loss = criterion(predictions, y)
             loss.backward()
             optimizer.step()
-
             loss_item = loss.item()
             training_losses.append(loss_item)
+
             if step % 100 == 0:
-                print(f"Step: {step}: Loss: {loss_item:.4f}")
-
-
+                print(f"Batch: {step}: Loss: {loss_item:.4f}")
 
         # save model
         if epoch % 5 == 0 and epoch != 0:
