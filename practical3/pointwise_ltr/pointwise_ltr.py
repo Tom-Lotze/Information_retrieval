@@ -3,6 +3,9 @@ import torch.nn as nn
 import numpy as np
 import os
 import sys
+import json
+import argparse
+
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 sys.path.append('..')
@@ -74,7 +77,7 @@ class Pointwise(nn.Module):
                 predictions = np.argmax(logits, axis=1)
                 predictions_list.extend(list(predictions))
 
-            results = evl.evaluate(data.validation, np.array(predictions_list), print_results=True)
+            results = evl.evaluate(data.validation, np.array(predictions_list), print_results=False)
 
         return results
 
@@ -109,9 +112,9 @@ def weights_init(model):
             torch.nn.init.zeros_(model.bias)
 
 # train function
-def train(data):
+def train(data, FLAGS):
     #model = Pointwise(data.num_features, [512, 256, 128, 64, 8])
-    n_hidden = [512, 128, 8]
+    n_hidden = [int(n_h) for n_h in FLAGS.hidden_units.split(",")]
     model = Pointwise(data.num_features, n_hidden, n_outputs=5)
     model.apply(weights_init)
 
@@ -122,16 +125,17 @@ def train(data):
     learning_rate = 0.01
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(model.parameters(), lr=FLAGS.learning_rate)
 
-    training_data_generator = DataLoader(data.train, batch_size=512, shuffle=True, drop_last=True, num_workers = 4)
+    training_data_generator = DataLoader(data.train, batch_size=FLAGS.batch_size, shuffle=True, drop_last=True, num_workers = 4)
 
     model.to(device)
 
     training_losses = []
     validation_results = {}
+    filename_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{learning_rate}.json"
 
-    for epoch in range(nr_epochs):
+    for epoch in range(FLAGS.max_epochs):
         print(f"Epoch: {epoch}")
         model.train()
 
@@ -154,18 +158,36 @@ def train(data):
 
 
 
-        # save mode
-        filename = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{learning_rate}.pt"
-        torch.save(model.state_dict(), filename)
-        print(f"Model is saved as {filename}")
+        # save model
+        if epoch % 5 == 0 and epoch != 0:
+            filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{learning_rate}.pt"
+            torch.save(model.state_dict(), filename_model)
+            print(f"Model is saved as {filename_model}")
 
         # run on validation set
         model.eval()
         results_validation = model.evaluate_on_validation(data)
         validation_results[epoch] = results_validation
 
+    # save results
+    with open(filename_results, "w") as writer:
+        json.dump(validation_results, writer, indent=1)
+    print(f"Results are saved in the json_files folder")
+
+
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hidden_units', type = str, default = "512, 128, 8", help='Comma separated list of unit numbers in each hidden layer')
+    parser.add_argument('--learning_rate', type = float, default = 0.01, help='Learning rate')
+    parser.add_argument('--max_epochs', type = int, default = 40, help='Max number of epochs')
+    parser.add_argument('--batch_size', type = int, default = 512, help='Batch size')
+
+    # set configuration in FLAGS parameter
+    FLAGS, unparsed = parser.parse_known_args()
+
+    # set seeds for reproducibility
     np.random.seed(42)
     torch.manual_seed(42)
 
@@ -174,19 +196,22 @@ if __name__ == "__main__":
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
 
+    # create necessary datasets
     os.makedirs("pointwise_ltr/models", exist_ok=True)
+    os.makedirs("pointwise_ltr/json_files", exist_ok=True)
 
+    # print information about dataset, if needed
+    if False:
+        print('Number of features: %d' % data.num_features)
+        print('Number of queries in training set: %d' % data.train.num_queries())
+        print('Number of documents in training set: %d' % data.train.num_docs())
+        print('Number of queries in validation set: %d' % data.validation.num_queries())
+        print('Number of documents in validation set: %d' % data.validation.num_docs())
+        print('Number of queries in test set: %d' % data.test.num_queries())
+        print('Number of documents in test set: %d' % data.test.num_docs())
 
-    print('Number of features: %d' % data.num_features)
-    print('Number of queries in training set: %d' % data.train.num_queries())
-    print('Number of documents in training set: %d' % data.train.num_docs())
-    print('Number of queries in validation set: %d' % data.validation.num_queries())
-    print('Number of documents in validation set: %d' % data.validation.num_docs())
-    print('Number of queries in test set: %d' % data.test.num_queries())
-    print('Number of documents in test set: %d' % data.test.num_docs())
-
-
-    train(data)
+    # train the model given the current hyperparameters
+    train(data, FLAGS)
 
 
 
