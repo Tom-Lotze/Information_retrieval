@@ -119,14 +119,30 @@ class DataFoldSplit(object):
                 self.datafold.feature_map[f_i], doc_feat[f_i])
         return doc_str
 
-    # added by tom
+
+# added by tom, for pointwise dataset
+class Pointwise_fold(object):
+    def __init__(fold):
+        self.fold = fold
+
     def __len__(self):
-        return self.num_docs()
+        return self.fold.num_docs()
 
     def __getitem__(self, index):
-        doc = self.feature_matrix[index]
-        label = self.label_vector[index]
+        doc = self.fold.feature_matrix[index]
+        label = self.fold.label_vector[index]
         return doc, label
+
+# for pairwise and listwise dataset
+class ListDataSet(Dataset):
+    def __init__(self, fold):
+        self.fold = fold
+
+    def __len__(self):
+        return self.fold.num_queries()
+
+    def __getitem__(self, index):
+        return self.fold.query_feat(index), self.fold.query_labels(index)
 
 
 
