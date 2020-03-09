@@ -83,9 +83,30 @@ class Pointwise(nn.Module):
 
 
 
-    def evaluate_on_test(self, x_test, y_test):
+    def evaluate_on_test(self, data):
         model.eval()
-        pass
+        with torch.no_grad():
+            predictions_list = []
+
+            test_data_generator = DataLoader(data.test, batch_size=2042, shuffle=False, drop_last=False)
+
+            for step, (x_test, y_test) in enumerate(
+                            test_data_generator):
+                x_test, y_test = x_test.float().to(self.device), Variable(y_test).to(self.device)
+                logits = self.forward(x_test)
+                predictions = np.argmax(logits, axis=1)
+                predictions_list.extend(list(predictions))
+
+            results = evl.evaluate(data.test, np.array(predictions_list), print_results=False)
+
+        return results
+
+
+
+
+
+
+            return results
 
 
 
@@ -130,7 +151,8 @@ def train(data, FLAGS):
     # init results lists
     training_losses = []
     validation_results = {}
-    filename_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_validation_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_test_results = f"./pointwise_ltr/json_files/pointwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
 
     model.to(device)
 
@@ -169,10 +191,11 @@ def train(data, FLAGS):
 
     # save results
     if FLAGS.save:
-        with open(filename_results, "w") as writer:
+        with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
+        with open(filename_test_results, "w") as writer:
+            json.dump(model.evaluate_on_test(data), writer, indent=1)
         print(f"Results are saved in the json_files folder")
-
 
 
 if __name__ == "__main__":
