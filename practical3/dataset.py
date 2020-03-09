@@ -134,7 +134,7 @@ class Pointwise_fold(object):
         return doc, label
 
 # for pairwise and listwise dataset
-class ListDataSet(Dataset):
+class ListDataSet(object):
     def __init__(self, fold):
         self.fold = fold
 
