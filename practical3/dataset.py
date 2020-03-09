@@ -122,7 +122,7 @@ class DataFoldSplit(object):
 
 # added by tom, for pointwise dataset
 class Pointwise_fold(object):
-    def __init__(fold):
+    def __init__(self, fold):
         self.fold = fold
 
     def __len__(self):
