@@ -157,7 +157,7 @@ def train(data, FLAGS):
                 print(f"Batch: {step}: Loss: {loss_item:.4f}")
 
         # save model
-        if epoch % 5 == 0 and epoch != 0:
+        if epoch % 5 == 0 and epoch != 0 and FLAGS.save:
             filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt"
             torch.save(model.state_dict(), filename_model)
             print(f"Model is saved as {filename_model}")
@@ -168,9 +168,10 @@ def train(data, FLAGS):
         validation_results[epoch] = results_validation
 
     # save results
-    with open(filename_results, "w") as writer:
-        json.dump(validation_results, writer, indent=1)
-    print(f"Results are saved in the json_files folder")
+    if FLAGS.save:
+        with open(filename_results, "w") as writer:
+            json.dump(validation_results, writer, indent=1)
+        print(f"Results are saved in the json_files folder")
 
 
 
@@ -181,9 +182,11 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type = float, default = 0.01, help='Learning rate')
     parser.add_argument('--max_epochs', type = int, default = 40, help='Max number of epochs')
     parser.add_argument('--batch_size', type = int, default = 512, help='Batch size')
+    parser.add_argument("--save", type=int, default=1, help="Either 1 or 0 (bool) to save the model")
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
+    FLAGS.save = bool(FLAGS.save)
 
     # set seeds for reproducibility
     np.random.seed(42)
@@ -193,6 +196,11 @@ if __name__ == "__main__":
     # import the data
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
+
+    # create instances specific for pointwise model
+    data.train = dataset.Pointwise_fold(data.train)
+    data.validation = dataset.Pointwise_fold(data.validation)
+    data.test = dataset.Pointwise_fold(data.test)
 
     # create necessary datasets
     os.makedirs("pointwise_ltr/models", exist_ok=True)
