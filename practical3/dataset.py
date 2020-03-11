@@ -133,6 +133,7 @@ class Pointwise_fold(object):
         label = self.fold.label_vector[index]
         return doc, label
 
+
 # for pairwise and listwise dataset
 class ListDataSet(object):
     def __init__(self, fold):
@@ -143,7 +144,6 @@ class ListDataSet(object):
 
     def __getitem__(self, index):
         return self.fold.query_feat(index), self.fold.query_labels(index)
-
 
 
 class DataFold(object):
