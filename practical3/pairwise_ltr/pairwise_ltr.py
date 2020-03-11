@@ -64,6 +64,7 @@ def train(data):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     step = 0
+
     for epoch in range(n_epochs):
 
         with tqdm(total=len(train_dl)) as t:
@@ -82,17 +83,16 @@ def train(data):
                 y_hat = model(x_batch.float()).squeeze()
 
                 # compute score diffs per doc pair
-                y_hat_diffs = Variable(torch.Tensor([(i - j)
-                                                     for i in y_hat
-                                                     for j in
-                                                     y_hat if
-                                                     i.item() != j.item()]))
+                y_hat_diffs = Variable(torch.Tensor([(s_i - s_j)
+                                                     for i, s_i in enumerate(y_hat)
+                                                     for j, s_j in enumerate(y_hat)
+                                                     if i != j]), requires_grad=True)
 
                 # label pairs
-                y_pairs = torch.Tensor([(i, j)
-                                        for i in y_batch
-                                        for j in y_batch
-                                        if i.item() != j.item()])
+                y_pairs = torch.Tensor([(s_i, s_j)
+                                        for i, s_i in enumerate(y_batch)
+                                        for j, s_j in enumerate(y_batch)
+                                        if i != j])
 
                 # compute real diffs
                 S_ij = torch.zeros_like(y_hat_diffs)
