@@ -1,6 +1,9 @@
 import sys
 import numpy as np
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+from tqdm import tqdm
+from torch.autograd import Variable
 import torch
 import time
 sys.path.append('..')
@@ -29,25 +32,17 @@ class RankNet(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
-    def forward(self, pair_batch):
+    def forward(self, x):
         """
         Forward pass
         - x: batch of document pairs B x (doc_i, doc_j)
         - out: batch of document scores: B x 1
         """
 
-        d_i = torch.Tensor([doc_pair[0] for doc_pair in pair_batch])
-        d_j = torch.Tensor([doc_pair[1] for doc_pair in pair_batch])
+        h_i = self.relu(self.fc1(x))
+        s_i = self.sigmoid(self.fc2(h_i))
 
-        h_i = self.relu(self.fc1(d_i))
-        s_i = self.fc2(h_i)
-
-        h_j = self.relu(self.fc1(d_j))
-        s_j = self.fc2(h_j)
-
-        diff = s_i - s_j
-
-        return diff
+        return s_i
 
 
 def weights_init(model):
@@ -62,63 +57,68 @@ def train(data):
     model = RankNet(data.num_features, 256, 1)
     model.apply(weights_init)
 
-    labels = data.train.label_vector
-    all_docs = data.train.feature_matrix
+    n_epochs = 10
 
-    batches = []
+    train_dataset = dataset.ListDataSet(data.train)
+    train_dl = DataLoader(train_dataset)
 
-    print(f'Creating training pairs per query')
-    for q_id in range(data.train.num_queries())[1:10000]:
-        # print(f'query_id: {q_id}')
-        s_i, e_i = data.train.query_range(q_id)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    step = 0
+    for epoch in range(n_epochs):
 
-        q_r = np.arange(s_i, e_i)
-        # print(f' query_range = {q_r}')
-        # labels = data.train.query_labels(q_id)
+        with tqdm(total=len(train_dl)) as t:
+            t.set_description(f'Epoch: {epoch+1}/{n_epochs}')
+            for step, (x_batch, y_batch) in enumerate(train_dl):
+                optimizer.zero_grad()
 
-        query_doc_pairs = [(i, j) for i in q_r for j in q_r if i != j]
+                # ignore batch if only one doc (no pairs)
+                if x_batch.shape[1] == 1:
+                    continue
 
-        doc_pair_features = [(all_docs[i], all_docs[j])
-                             for i, j in query_doc_pairs]
+                # squeeze batch
+                y_batch = y_batch.squeeze()
 
-        query_doc_pairs_labels = [(labels[i], labels[j])
-                                  for i, j in query_doc_pairs]
+                # compute scores per doc
+                y_hat = model(x_batch.float()).squeeze()
 
-        true_pair_scores = [pair_score(i, j)
-                            for i, j in query_doc_pairs_labels]
+                # compute score diffs per doc pair
+                y_hat_diffs = Variable(torch.Tensor([(i - j)
+                                                     for i in y_hat
+                                                     for j in
+                                                     y_hat if
+                                                     i.item() != j.item()]))
 
-        x = doc_pair_features
-        y = true_pair_scores
+                # label pairs
+                y_pairs = torch.Tensor([(i, j)
+                                        for i in y_batch
+                                        for j in y_batch
+                                        if i.item() != j.item()])
 
-        batches.append((x, y))
-    print(f'Created batches. Start training')
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # see section 5
+                # compute real diffs
+                S_ij = torch.zeros_like(y_hat_diffs)
+                for s, (i, j) in enumerate(y_pairs):
+                    if i > j:
+                        S_ij[s] = 1
+                    elif i == j:
+                        S_ij[s] = 0
+                    elif i < j:
+                        S_ij[s] = -1
 
-    for x_batch, y_batch in batches:
-        optimizer.zero_grad()
+                # define loss function
+                # sigma = 1
+                loss = (1/2) * (1 - S_ij) * y_hat_diffs + \
+                    torch.log(1 + torch.exp(-1 * y_hat_diffs))
 
-        diff = model(x_batch)
+                # take mean to compare between batches
+                loss = torch.mean(loss)
 
-        S_ij = torch.Tensor(y_batch)
+                # backward pass
+                loss.backward()
+                optimizer.step()
 
-        # define loss function
-        # sigma = 1
-        loss = (1/2) * (1 - S_ij) * diff + \
-            torch.log(1 + torch.exp(-1 * diff))
-
-        loss = torch.mean(loss)
-        print(loss.item())
-        loss.backward()
-        optimizer.step()
-
-
-def pair_score(s_i, s_j):
-    if s_i > s_j:
-        return 1
-    elif s_i < s_j:
-        return -1
-    elif s_i == s_j:
-        return 0
+                if step % 10 == 0:
+                    t.set_postfix_str(f'loss: {loss.item()}')
+                t.update()
 
 
 if __name__ == "__main__":
@@ -142,6 +142,5 @@ if __name__ == "__main__":
     print('Number of documents in test set: %d' % data.test.num_docs())
 
     # train Model
-    # toy data:
 
     train(data)
