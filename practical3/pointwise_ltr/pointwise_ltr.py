@@ -66,7 +66,6 @@ class Pointwise(nn.Module):
 
     def evaluate_on_validation(self, data):
         with torch.no_grad():
-            averages = []
             predictions_list = []
 
             validation_data_generator = DataLoader(data.validation, batch_size=2042, shuffle=False, drop_last=False)
@@ -101,17 +100,6 @@ class Pointwise(nn.Module):
             results = evl.evaluate(data.test, np.array(predictions_list), print_results=False)
 
         return results
-
-
-
-    def accuracy(self, predictions, labels):
-        batch_size = labels.shape[0]
-        predictions = predictions.argmax(dim=1)
-        total_correct = torch.sum(predictions == labels).item()
-        accuracy = total_correct / batch_size
-        # print(f"total_correct: {total_correct}, batch_size: {batch_size}")
-
-        return accuracy
 
 
     def ndcg(self, predictions, labels, k=10):
@@ -201,7 +189,7 @@ def train(data, FLAGS):
 
     # save results
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, training_losses)
+        plot_loss_ndcg(validation_results, training_losses, )
 
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
@@ -211,11 +199,10 @@ def train(data, FLAGS):
         print(f"Results are saved in the json_files folder")
 
 
-def plot_loss_ndcg(ndcg, loss):
+def plot_loss_ndcg(ndcg, loss, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
-    breakpoint()
 
     fig, ax1 = plt.subplots()
 
@@ -235,7 +222,7 @@ def plot_loss_ndcg(ndcg, loss):
     fig.title("nDCG and training loss for Pointwise LTR")
     plt.legend()
     fig.tight_layout()
-    plt.show()
+    plt.savefig("pointwise_ltr/figures")
 
 
 if __name__ == "__main__":
@@ -273,6 +260,7 @@ if __name__ == "__main__":
     # create necessary datasets
     os.makedirs("pointwise_ltr/models", exist_ok=True)
     os.makedirs("pointwise_ltr/json_files", exist_ok=True)
+    os.makedirs("pointwise_ltr/figures", exist_ok=True)
 
     # print information about dataset, if needed
     if False:
