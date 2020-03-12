@@ -121,8 +121,9 @@ class DataFoldSplit(object):
 
 
 # added by tom, for pointwise dataset
-class Pointwise_fold(object):
+class Pointwise_fold(DataFoldSplit):
     def __init__(self, fold):
+        super(Pointwise_fold, self).__init__(fold.datafold, fold.name, fold.doclist_ranges, fold.feature_matrix, fold.label_vector)
         self.fold = fold
 
     def __len__(self):
