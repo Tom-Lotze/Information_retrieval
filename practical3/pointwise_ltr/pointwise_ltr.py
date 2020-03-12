@@ -103,13 +103,6 @@ class Pointwise(nn.Module):
 
 
 
-
-
-
-            return results
-
-
-
     def accuracy(self, predictions, labels):
         batch_size = labels.shape[0]
         predictions = predictions.argmax(dim=1)
@@ -131,6 +124,7 @@ def weights_init(model):
         nn.init.xavier_uniform_(model.weight.data)
         if model.bias is not None:
             torch.nn.init.zeros_(model.bias)
+
 
 # train function
 def train(data, FLAGS):
@@ -157,11 +151,11 @@ def train(data, FLAGS):
     model.to(device)
 
     for epoch in range(FLAGS.max_epochs):
-        print(f"Epoch: {epoch}")
-        model.train()
-
+        print(f"Epoch: {epoch+1}")
+        validation_results[epoch] = {}
         # iterate over batches
         for step, (x, y) in enumerate(training_data_generator):
+            model.train()
             x, y = x.float().to(device), Variable(y).to(device)
 
             # reset the optimizer and perform forward pass
@@ -173,10 +167,16 @@ def train(data, FLAGS):
             loss.backward()
             optimizer.step()
             loss_item = loss.item()
-            training_losses.append(loss_item)
 
             if step % 100 == 0:
                 print(f"Batch: {step}: Loss: {loss_item:.4f}")
+
+            if step % FLAGS.valid_each == 0:
+                # run on validation set
+                model.eval()
+                results_validation = model.evaluate_on_validation(data)
+                validation_results[epoch][step] = results_validation
+                training_losses.append(loss_item)
 
         # save model
         if epoch % 5 == 0 and epoch != 0 and FLAGS.save:
@@ -184,10 +184,13 @@ def train(data, FLAGS):
             torch.save(model.state_dict(), filename_model)
             print(f"Model is saved as {filename_model}")
 
-        # run on validation set
-        model.eval()
-        results_validation = model.evaluate_on_validation(data)
-        validation_results[epoch] = results_validation
+        # early stopping
+        if epoch > 1:
+            mean_prev_epoch = np.mean(list(validation_results[epoch-1].keys()))
+            mean_curr_epoch = np.mean(list(validation_results[epoch].keys()))
+            if mean_curr_epoch <= mean_prev_epoch + FLAGS.early_stopping_threshold:
+                print("Early stopping condition satistief, stopping training")
+                break
 
     # save results
     if FLAGS.save:
@@ -205,7 +208,9 @@ if __name__ == "__main__":
     parser.add_argument('--learning_rate', type = float, default = 0.01, help='Learning rate')
     parser.add_argument('--max_epochs', type = int, default = 40, help='Max number of epochs')
     parser.add_argument('--batch_size', type = int, default = 512, help='Batch size')
-    parser.add_argument("--save", type=int, default=1, help="Either 1 or 0 (bool) to save the model")
+    parser.add_argument("--save", type=int, default=1, help="Either 1 or 0 (bool) to save the model and results")
+    parser.add_argument("--valid_each", type=int, default=100, help="Run the model on the validation set every x steps")
+    parser.add_argument("--early_stopping_threshold", type=float, default=0.0, help="Minimal difference in ndcg on validation set between epochs to continue training")
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
