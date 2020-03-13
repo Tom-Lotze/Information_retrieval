@@ -27,8 +27,8 @@ def compute_actual_dist(data_set):
     return count
 
 def compute_pred_dist():
-    predictions = pkl.load(open("pointwise_LTR/predictions.pt", "r"))
-
+    predictions = pkl.load(open("pointwise_LTR/predictions.pt", "rb"))
+    predictions = [i.item() for i in predictions]
     count = Counter(predictions)
 
     return count
@@ -62,6 +62,6 @@ if __name__ == "__main__":
 
     plot(actual_dist_test, "Test set")
     plot(actual_dist_valid, "Validation set")
-
+    plot(pred_dist, "Distribution of predicted labels of test set")
 
     plt.show()
