@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import argparse
+import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
@@ -65,7 +66,6 @@ class Pointwise(nn.Module):
 
     def evaluate_on_validation(self, data):
         with torch.no_grad():
-            averages = []
             predictions_list = []
 
             validation_data_generator = DataLoader(data.validation, batch_size=2042, shuffle=False, drop_last=False)
@@ -102,17 +102,6 @@ class Pointwise(nn.Module):
         return results
 
 
-
-    def accuracy(self, predictions, labels):
-        batch_size = labels.shape[0]
-        predictions = predictions.argmax(dim=1)
-        total_correct = torch.sum(predictions == labels).item()
-        accuracy = total_correct / batch_size
-        # print(f"total_correct: {total_correct}, batch_size: {batch_size}")
-
-        return accuracy
-
-
     def ndcg(self, predictions, labels, k=10):
         return evl.ndcg_at_k(sorted_labels, ideal_labels, k)
 
@@ -145,14 +134,16 @@ def train(data, FLAGS):
     # init results lists
     training_losses = []
     validation_results = {}
+    ndcg_per_epoch = {}
     filename_validation_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}.json"
     filename_test_results = f"./pointwise_ltr/json_files/pointwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
 
     model.to(device)
+    overall_step = 0
 
     for epoch in range(FLAGS.max_epochs):
         print(f"Epoch: {epoch+1}")
-        validation_results[epoch] = {}
+        ndcg_per_epoch[epoch] = {}
         # iterate over batches
         for step, (x, y) in enumerate(training_data_generator):
             model.train()
@@ -168,15 +159,18 @@ def train(data, FLAGS):
             optimizer.step()
             loss_item = loss.item()
 
-            if step % 100 == 0:
-                print(f"Batch: {step}: Loss: {loss_item:.4f}")
+            if overall_step % 100 == 0:
+                print(f"Batch: {overall_step}: Loss: {loss_item:.4f}")
 
-            if step % FLAGS.valid_each == 0:
+            if overall_step % FLAGS.valid_each == 0:
                 # run on validation set
                 model.eval()
                 results_validation = model.evaluate_on_validation(data)
-                validation_results[epoch][step] = results_validation
+                validation_results[overall_step] = results_validation
+                ndcg_per_epoch[epoch][step] = results_validation["ndcg"][0]
                 training_losses.append(loss_item)
+
+            overall_step += 1
 
         # save model
         if epoch % 5 == 0 and epoch != 0 and FLAGS.save:
@@ -185,20 +179,50 @@ def train(data, FLAGS):
             print(f"Model is saved as {filename_model}")
 
         # early stopping
-        if epoch > 1:
-            mean_prev_epoch = np.mean(list(validation_results[epoch-1].keys()))
-            mean_curr_epoch = np.mean(list(validation_results[epoch].keys()))
+        if epoch > 0:
+            mean_prev_epoch = np.mean(list(ndcg_per_epoch[epoch-1].values()))
+            mean_curr_epoch = np.mean(list(ndcg_per_epoch[epoch].values()))
+            print(mean_prev_epoch, mean_curr_epoch)
             if mean_curr_epoch <= mean_prev_epoch + FLAGS.early_stopping_threshold:
-                print("Early stopping condition satistief, stopping training")
+                print("Early stopping condition satistied, stopping training")
                 break
 
     # save results
+    if FLAGS.plot:
+        plot_loss_ndcg(validation_results, training_losses, )
+
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
         with open(filename_test_results, "w") as writer:
             json.dump(model.evaluate_on_test(data), writer, indent=1)
         print(f"Results are saved in the json_files folder")
+
+
+def plot_loss_ndcg(ndcg, loss, figname):
+    ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
+    x_labels = list(ndcg.keys())
+
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_xlabel('Batch (924 batches per epoch)')
+    ax1.set_ylabel('nDCG', color=color)
+    ax1.plot(x_labels, ndcg_values, color=color, label="nDCG")
+    ax1.tick_params(axis='y', labelcolor=color)
+
+    ax2 = ax1.twinx()
+
+    color = 'tab:blue'
+    ax2.set_ylabel('Training loss', color=color)
+    ax2.plot(x_labels, loss, color=color, label="Training loss")
+    ax2.tick_params(axis='y', labelcolor=color)
+
+    fig.title("nDCG and training loss for Pointwise LTR")
+    plt.legend()
+    fig.tight_layout()
+    plt.savefig("pointwise_ltr/figures")
 
 
 if __name__ == "__main__":
@@ -209,12 +233,15 @@ if __name__ == "__main__":
     parser.add_argument('--max_epochs', type = int, default = 40, help='Max number of epochs')
     parser.add_argument('--batch_size', type = int, default = 512, help='Batch size')
     parser.add_argument("--save", type=int, default=1, help="Either 1 or 0 (bool) to save the model and results")
+    parser.add_argument("--plot", type=int, default=1, help="Either 1 or 0 (bool) to create a plot of ndcg and loss")
     parser.add_argument("--valid_each", type=int, default=100, help="Run the model on the validation set every x steps")
     parser.add_argument("--early_stopping_threshold", type=float, default=0.0, help="Minimal difference in ndcg on validation set between epochs to continue training")
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
     FLAGS.save = bool(FLAGS.save)
+    FLAGS.plot = bool(FLAGS.plot)
+
 
     # set seeds for reproducibility
     np.random.seed(42)
@@ -233,6 +260,7 @@ if __name__ == "__main__":
     # create necessary datasets
     os.makedirs("pointwise_ltr/models", exist_ok=True)
     os.makedirs("pointwise_ltr/json_files", exist_ok=True)
+    os.makedirs("pointwise_ltr/figures", exist_ok=True)
 
     # print information about dataset, if needed
     if False:
