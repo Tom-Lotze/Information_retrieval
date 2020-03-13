@@ -47,14 +47,15 @@ class RankNet(nn.Module):
 
         return s_i
 
-    def evaluate_on_validation(self, valid_dl):
+    def evaluate_on_validation(self, data):
         """ evaluate on validation """
+        valid_data = data.validation
         with torch.no_grad():
-            averages = []
-            predictions_list = []
-
-            for step, (x_step, y_step) in enumerate(valid_dl):
-                pass
+            valid_scores = self.forward(
+                torch.Tensor(valid_data.feature_matrix))
+            valid_scores = valid_scores.numpy().squeeze()
+            results = evl.evaluate(valid_data, valid_scores)
+        return results
 
 
 class Loss_function(nn.Module):
@@ -70,8 +71,8 @@ class Loss_function(nn.Module):
         y_hat: 1d tensor of document scores
         """
 
-        diff_mat = Variable(torch.sigmoid(y_hat.repeat(
-            y_hat.shape[0], 1).t() - y_hat), requires_grad=True)
+        diff_mat = Variable(torch.sigmoid(y_hat.expand(
+            y_hat.shape[0], y_hat.shape[0]).t() - y_hat), requires_grad=True)
 
         labels_mat = y.repeat(y.shape[0], 1).t() - y
 
@@ -104,8 +105,8 @@ def train(data):
     train_dataset = dataset.ListDataSet(data.train)
     train_dl = DataLoader(train_dataset)
 
-    valid_dataset = dataset.ListDataSet(data.validation)
-    valid_dl = DataLoader(valid_dataset)
+    # valid_dataset = dataset.ListDataSet(data.validation)
+    # valid_dl = DataLoader(valid_dataset)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     step = 0
@@ -125,54 +126,31 @@ def train(data):
                 if x_batch.shape[1] == 1:
                     continue
 
-                if step > 5:
-                    continue
+                # if step > 5:
+                #     continue
 
                 x_batch = x_batch.float().squeeze()
                 # squeeze batch
 
                 y_batch = y_batch.squeeze().float()
 
-                # y_pairs = torch.Tensor([[s_i, s_j]
-                # for i, s_i in enumerate(y_batch)
-                # for j, s_j in enumerate(y_batch)
-                # if i != j])
-
-                # x_pairs = torch.Tensor([[d_i.numpy(), d_j.numpy()] for i, d_i in enumerate(
-                # x_batch) for j, d_j in enumerate(x_batch) if i != j])
-
-                # x_i = x_pairs[:, 0, :]
-                # x_j = x_pairs[:, 1, :]
-
-                # y_i = y_pairs[:, 0]
-                # y_j = y_pairs[:, 1]
-
                 scores = model(x_batch).squeeze()
-
-                # compute real diffs
-                # S_ij = torch.zeros_like(diffs)
-                # S_ij[y_i > y_j] = 1
-                # S_ij[y_j > y_j] = -1
 
                 # define loss function
                 loss = loss_function(scores, y_batch)
 
-                # Variable((1/2) * (1 - S_ij) * y_hat_diffs +
-                # torch.log(1 + torch.exp(-1 * y_hat_diffs)),
-                # requires_grad=True)
-
-                if step % 1 == 0:
+                if step % 100 == 0:
                     # model.eval()
-
+                    valid_results = model.evaluate_on_validation(data)
                     # ndcg_10 = evl.ndcg_at_k(sorted_labels, 10)
-                    t.set_postfix_str(f'loss: {loss.mean().item():3f}')
-                    # model.train()
+                    t.set_postfix_str(
+                        f'loss: {loss.mean().item():3f} ndcg@20: {valid_results["ndcg@20"][0]:3f}')
 
                 # take mean to compare between batches
                 # loss = loss.sum()
 
                 # backward pass
-                loss.backward()
+                loss.backward(retain_graph=True)
 
                 # optimizer step
                 optimizer.step()
