@@ -15,7 +15,7 @@ do
         echo "hidden units: $h_u, learning rate: $lr"
         python pointwise_ltr/pointwise_ltr.py --hidden_units "$h_u"\
          --learning_rate "$lr" \
-         >> pointwise_ltr/json_files/gridsearch_results.txt
+         >> pointwise_ltr/json_files/gridsearch_results_adam.txt
     done
 done
 
