@@ -6,6 +6,7 @@ import sys
 import json
 import argparse
 import matplotlib.pyplot as plt
+import pickle as pkl
 
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
@@ -83,8 +84,7 @@ class Pointwise(nn.Module):
 
 
 
-    def evaluate_on_test(self, data):
-        model.eval()
+    def evaluate_on_test(self, data, FLAGS):
         with torch.no_grad():
             predictions_list = []
 
@@ -97,6 +97,11 @@ class Pointwise(nn.Module):
                 predictions = np.argmax(logits, axis=1)
                 predictions_list.extend(list(predictions))
 
+            # save predictions list
+            if FLAGS.save_pred:
+                with open("pointwise_LTR/predictions.pt", "wb") as writer:
+                    pkl.dump(predictions_list, writer)
+
             results = evl.evaluate(data.test, np.array(predictions_list), print_results=False)
 
         return results
@@ -104,7 +109,6 @@ class Pointwise(nn.Module):
 
     def ndcg(self, predictions, labels, k=10):
         return evl.ndcg_at_k(sorted_labels, ideal_labels, k)
-
 
 
 # helper functions
@@ -123,7 +127,7 @@ def train(data, FLAGS):
     model.apply(weights_init)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=FLAGS.learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=FLAGS.learning_rate)
 
     training_data_generator = DataLoader(data.train, batch_size=FLAGS.batch_size, shuffle=True, drop_last=True, num_workers = 4)
 
@@ -135,8 +139,9 @@ def train(data, FLAGS):
     training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
-    filename_validation_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}.json"
-    filename_test_results = f"./pointwise_ltr/json_files/pointwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_validation_results = f"./pointwise_ltr/json_files/pointwise_{n_hidden}_{FLAGS.learning_rate}_Adam.json"
+    filename_test_results = f"./pointwise_ltr/json_files/pointwise_TEST_{n_hidden}_{FLAGS.learning_rate}_Adam.json"
+    figure_name = f"{n_hidden}_{FLAGS.learning_rate}_Adam.png"
 
     model.to(device)
     overall_step = 0
@@ -173,8 +178,8 @@ def train(data, FLAGS):
             overall_step += 1
 
         # save model
-        if epoch % 5 == 0 and epoch != 0 and FLAGS.save:
-            filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt"
+        if epoch % 3 == 0 and epoch != 0 and FLAGS.save:
+            filename_model = f"./pointwise_ltr/models/pointwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}_Adam.pt"
             torch.save(model.state_dict(), filename_model)
             print(f"Model is saved as {filename_model}")
 
@@ -189,13 +194,13 @@ def train(data, FLAGS):
 
     # save results
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, training_losses, )
+        plot_loss_ndcg(validation_results, training_losses, figure_name)
 
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
         with open(filename_test_results, "w") as writer:
-            json.dump(model.evaluate_on_test(data), writer, indent=1)
+            json.dump(model.evaluate_on_test(data, FLAGS), writer, indent=1)
         print(f"Results are saved in the json_files folder")
 
 
@@ -211,6 +216,7 @@ def plot_loss_ndcg(ndcg, loss, figname):
     ax1.set_ylabel('nDCG', color=color)
     ax1.plot(x_labels, ndcg_values, color=color, label="nDCG")
     ax1.tick_params(axis='y', labelcolor=color)
+    ax1.legend(loc=0)
 
     ax2 = ax1.twinx()
 
@@ -218,29 +224,31 @@ def plot_loss_ndcg(ndcg, loss, figname):
     ax2.set_ylabel('Training loss', color=color)
     ax2.plot(x_labels, loss, color=color, label="Training loss")
     ax2.tick_params(axis='y', labelcolor=color)
+    ax2.legend(loc=1)
 
-    fig.title("nDCG and training loss for Pointwise LTR")
-    plt.legend()
-    fig.tight_layout()
-    plt.savefig("pointwise_ltr/figures")
+    plt.title("nDCG and training loss for Pointwise LTR")
+    plt.tight_layout()
+    plt.savefig(f"pointwise_ltr/figures/{figname}")
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hidden_units', type = str, default = "512, 128, 8", help='Comma separated list of unit numbers in each hidden layer')
-    parser.add_argument('--learning_rate', type = float, default = 0.01, help='Learning rate')
+    parser.add_argument('--hidden_units', type = str, default = "256, 10", help='Comma separated list of unit numbers in each hidden layer')
+    parser.add_argument('--learning_rate', type = float, default = 0.001, help='Learning rate')
     parser.add_argument('--max_epochs', type = int, default = 40, help='Max number of epochs')
     parser.add_argument('--batch_size', type = int, default = 512, help='Batch size')
     parser.add_argument("--save", type=int, default=1, help="Either 1 or 0 (bool) to save the model and results")
-    parser.add_argument("--plot", type=int, default=1, help="Either 1 or 0 (bool) to create a plot of ndcg and loss")
+    parser.add_argument("--plot", type=int, default=0, help="Either 1 or 0 (bool) to create a plot of ndcg and loss")
     parser.add_argument("--valid_each", type=int, default=100, help="Run the model on the validation set every x steps")
     parser.add_argument("--early_stopping_threshold", type=float, default=0.0, help="Minimal difference in ndcg on validation set between epochs to continue training")
+    parser.add_argument("--save_pred", type = int, default=0, help="Boolean (0, 1) whether to save the predictions on the test set")
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
     FLAGS.save = bool(FLAGS.save)
     FLAGS.plot = bool(FLAGS.plot)
+    FLAGS.save_pred = bool(FLAGS.save_pred)
 
 
     # set seeds for reproducibility
