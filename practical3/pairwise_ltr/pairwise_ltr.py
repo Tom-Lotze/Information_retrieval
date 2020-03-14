@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import torch.nn as nn
+from torchviz import make_dot
+import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from torch.autograd import Variable
@@ -41,9 +43,18 @@ class RankNet(nn.Module):
         """
         # d_i = pairs[:, 0, :]
         # d_j = pairs[:, 1, :]
+        # print(x_batch.shape)
+        h_i = self.sigmoid(self.fc1(x_batch))
+        s_i = self.sigmoid(self.fc2(h_i))
 
-        h_i = self.relu(self.fc1(x_batch))
-        s_i = self.relu(self.fc2(h_i))
+        diff_mat = self.sigmoid(torch.add(s_i.t(), -s_i))
+
+        return diff_mat
+
+    def single_foward(self, x_batch):
+
+        h_i = self.fc1(x_batch)
+        s_i = self.fc2(h_i)
 
         return s_i
 
@@ -51,7 +62,7 @@ class RankNet(nn.Module):
         """ evaluate on validation """
         valid_data = data.validation
         with torch.no_grad():
-            valid_scores = self.forward(
+            valid_scores = self.single_foward(
                 torch.Tensor(valid_data.feature_matrix))
             valid_scores = valid_scores.numpy().squeeze()
             results = evl.evaluate(valid_data, valid_scores)
@@ -71,8 +82,11 @@ class Loss_function(nn.Module):
         y_hat: 1d tensor of document scores
         """
 
-        diff_mat = Variable(torch.sigmoid(y_hat.expand(
-            y_hat.shape[0], y_hat.shape[0]).t() - y_hat), requires_grad=True)
+        # diff_mat = Variable(torch.sigmoid(y_hat.expand(
+        # y_hat.shape[0], y_hat.shape[0]).t() - y_hat), requires_grad=True)
+
+        diff_mat = Variable(torch.sigmoid(
+            torch.add(y_hat.t(), -y_hat)), requires_grad=True)
 
         labels_mat = y.repeat(y.shape[0], 1).t() - y
 
@@ -80,12 +94,13 @@ class Loss_function(nn.Module):
         labels_mat[labels_mat == 0] = (1/2)
         labels_mat[labels_mat < 0] = 0
 
-        # loss = (1/2) * (1 - labels_mat) * self.gamma * diff_mat + \
-        # torch.log(1+torch.exp(-self.gamma * diff_mat))
-
         loss = nn.functional.binary_cross_entropy(diff_mat, labels_mat)
 
         return loss
+
+    def backward(self):
+        """ backward pass sped up ranknet """
+        pass
 
 
 def weights_init(model):
@@ -109,9 +124,9 @@ def train(data):
     # valid_dl = DataLoader(valid_dataset)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    step = 0
 
-    loss_function = Loss_function(gamma=1)
+    # loss_function = Loss_function(gamma=1)
+    loss_function = nn.BCELoss(reduction='mean')
 
     for epoch in range(n_epochs):
 
@@ -132,25 +147,35 @@ def train(data):
                 x_batch = x_batch.float().squeeze()
                 # squeeze batch
 
-                y_batch = y_batch.squeeze().float()
+                y_batch = y_batch.float().t()
 
-                scores = model(x_batch).squeeze()
+                labels_mat = y_batch.t() - y_batch
+
+                labels_mat[labels_mat > 0] = 1
+                labels_mat[labels_mat == 0] = (1/2)
+                labels_mat[labels_mat < 0] = 0
+
+                diff_scores = model(x_batch)
+
+                loss = loss_function(diff_scores, labels_mat)
 
                 # define loss function
-                loss = loss_function(scores, y_batch)
+                # loss = loss_function(scores, y_batch)
 
-                if step % 100 == 0:
+                if step % 5 == 0:
                     # model.eval()
+
                     valid_results = model.evaluate_on_validation(data)
+                    # valid_results = {'ndcg@20': (0.5, 0.4)}
                     # ndcg_10 = evl.ndcg_at_k(sorted_labels, 10)
                     t.set_postfix_str(
-                        f'loss: {loss.mean().item():3f} ndcg@20: {valid_results["ndcg@20"][0]:3f}')
+                        f'loss: {loss.mean().item():3f} ndcg: {valid_results["ndcg"][0]:3f}')
 
                 # take mean to compare between batches
                 # loss = loss.sum()
 
                 # backward pass
-                loss.backward(retain_graph=True)
+                loss.backward()
 
                 # optimizer step
                 optimizer.step()
@@ -164,6 +189,8 @@ if __name__ == "__main__":
     import dataset
     import evaluate as evl
 
+    np.random.seed(42)
+    torch.manual_seed(42)
     # # load and read data
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
