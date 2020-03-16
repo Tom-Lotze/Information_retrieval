@@ -74,7 +74,7 @@ class RankNet(nn.Module):
             test_scores = self.single_foward(
                 torch.Tensor(test_data.feature_matrix))
             test_scores = test_scores.numpy().squeeze()
-            results = evl.evaluate(test.data, test_scores)
+            results = evl.evaluate(test_data, test_scores)
         return results
 
 
@@ -88,13 +88,11 @@ def weights_init(model):
 
 def train(data, FLAGS):
 
-    n_hidden = FLAGS.number_hidden
+    n_hidden = FLAGS.hidden_units
     n_epochs = FLAGS.max_epochs
 
     model = RankNet(data.num_features, n_hidden, 1)
     model.apply(weights_init)
-
-    n_epochs = 10
 
     train_dataset = dataset.ListDataSet(data.train)
     train_dl = DataLoader(train_dataset)
@@ -229,8 +227,8 @@ if __name__ == "__main__":
     data.read_data()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hidden_units', type=str, default="256, 10",
-                        help=('Comma separated list of unit numbers in each '
+    parser.add_argument('--hidden_units', type=int, default=256,
+                        help=('Integer specifying number of hidden units in '
                               'hidden layer'))
     parser.add_argument('--learning_rate', type=float,
                         default=0.001, help='Learning rate')
