@@ -4,7 +4,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from torch.autograd import Variable
+# from torch.autograd import Variable
 import torch
 import argparse
 import json
@@ -14,8 +14,8 @@ sys.path.append('..')
 sys.path.append('.')
 
 
-class RankNet(nn.Module):
-    """ Pairwise LTR model """
+class FastRankNet(nn.Module):
+    """ Sped up Pairwise LTR model """
 
     def __init__(self, input_dim,  n_hidden=256,  output_dim=1):
         """
@@ -24,7 +24,7 @@ class RankNet(nn.Module):
         n_hidden: dimensionality of hidden layer
         n_outputs: output dimensionality
         """
-        super(RankNet, self).__init__()
+        super(FastRankNet, self).__init__()
 
         self.input_dim = input_dim
         self.n_hidden = n_hidden
@@ -46,9 +46,10 @@ class RankNet(nn.Module):
         h_i = self.sigmoid(self.fc1(x_batch))
         s_i = self.sigmoid(self.fc2(h_i))
 
-        diff_mat = self.sigmoid(torch.add(s_i.t(), -s_i))
+        # diff_mat = self.sigmoid(torch.add(s_i.t(), -s_i))
 
-        return diff_mat
+        # return diff_mat
+        return s_i
 
     def single_foward(self, x_batch):
 
@@ -91,7 +92,7 @@ def train(data, FLAGS):
     n_hidden = FLAGS.hidden_units
     n_epochs = FLAGS.max_epochs
 
-    model = RankNet(data.num_features, n_hidden, 1)
+    model = FastRankNet(data.num_features, n_hidden, 1)
     model.apply(weights_init)
 
     train_dataset = dataset.ListDataSet(data.train)
@@ -99,14 +100,14 @@ def train(data, FLAGS):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=FLAGS.learning_rate)
 
-    loss_function = nn.BCELoss(reduction='mean')
+    # loss_function = nn.BCELoss(reduction='mean')
 
     training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
 
-    filename_validation_results = f"./pairwise_ltr/json_files/pairwise_{n_hidden}_{FLAGS.learning_rate}.json"
-    filename_test_results = f"./pairwise_ltr/json_files/pairwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_validation_results = f"./pairwise_ltr_sped_up/json_files/pairwise_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_test_results = f"./pairwise_ltr_sped_up/json_files/pairwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
     figure_name = f"{n_hidden}_{FLAGS.learning_rate}.png"
 
     overall_step = 0
@@ -132,12 +133,21 @@ def train(data, FLAGS):
                 labels_mat = y_batch.t() - y_batch
 
                 labels_mat[labels_mat > 0] = 1
-                labels_mat[labels_mat == 0] = (1/2)
-                labels_mat[labels_mat < 0] = 0
+                labels_mat[labels_mat == 0] = 0
+                labels_mat[labels_mat < 0] = -1
 
-                diff_scores = model(x_batch)
+                scores = model(x_batch)
 
-                loss = loss_function(diff_scores, labels_mat)
+                diff_mat = torch.sigmoid(torch.add(scores.t(), -scores))
+
+                # print(labels_mat)
+                lambda_ij = (
+                    1 * ((1/2) * (1 - labels_mat) - diff_mat))
+
+                lambda_i = lambda_ij.sum(dim=0)
+
+                loss = lambda_ij.mean()
+                # loss = loss_function(diff_scores, labels_mat)
 
                 if overall_step % FLAGS.valid_each == 0:
                     model.eval()
@@ -149,8 +159,9 @@ def train(data, FLAGS):
                         f'loss: {loss.mean().item():3f} ndcg: {valid_results["ndcg"][0]:3f}')
 
                 # backward pass
-                loss.backward()
-
+                # loss.backward()
+                # lambda_ij.backward(torch.ones(lambda_ij.shape))
+                scores.squeeze().backward(lambda_i)
                 # optimizer step
                 optimizer.step()
 
@@ -160,7 +171,7 @@ def train(data, FLAGS):
 
             if epoch % 1 == 0 and FLAGS.save:
                 filename_model = (
-                    f"./pairwise_ltr/models/pairwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt")
+                    f"./pairwise_ltr_sped_up/models/pairwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt")
                 torch.save(model.state_dict(), filename_model)
                 print(f"Model is saved as {filename_model}")
 
@@ -209,9 +220,9 @@ def plot_loss_ndcg(ndcg, loss, figname):
     ax2.tick_params(axis='y', labelcolor=color)
     ax2.legend(loc=1)
 
-    plt.title("nDCG and training loss for Pairwise LTR")
+    plt.title("nDCG and training loss for Sped up Pairwise LTR")
     plt.tight_layout()
-    plt.savefig(f"pairwise_ltr/figures/{figname}")
+    plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
 
 
 if __name__ == "__main__":
@@ -268,9 +279,9 @@ if __name__ == "__main__":
     print('Number of documents in test set: %d' % data.test.num_docs())
 
     # create necessary datasets
-    os.makedirs("pairwise_ltr/models", exist_ok=True)
-    os.makedirs("pairwise_ltr/json_files", exist_ok=True)
-    os.makedirs("pairwise_ltr/figures", exist_ok=True)
+    os.makedirs("pairwise_ltr_sped_up/models", exist_ok=True)
+    os.makedirs("pairwise_ltr_sped_up/json_files", exist_ok=True)
+    os.makedirs("pairwise_ltr_sped_up/figures", exist_ok=True)
 
     # train model
     train(data, FLAGS)
