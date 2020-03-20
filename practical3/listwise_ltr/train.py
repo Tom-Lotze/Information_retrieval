@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from collections import defaultdict
 import numpy as np
-import time, sys, os
+import time, sys, os, pickle
 sys.path.append('..')
-# sys.path.append(".")
 import dataset
 
 
@@ -228,7 +227,7 @@ def train(train_dl, valid_dl, config, max_epochs, early_stopping_metric, patienc
 
 
 def plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, valid_err, name):
-    f, (ax1, ax2) = plt.subplots(1,3)
+    f, (ax1, ax2, ax3) = plt.subplots(1,3, figsize=(10,4))
     
     ax1.plot([np.mean(train_loss[epoch]) for epoch in train_loss], label='train')
     ax1.plot([np.mean(valid_loss[epoch]) for epoch in valid_loss], label='valid')
@@ -240,10 +239,10 @@ def plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, va
     ax2.set_xlabel('Epoch')
     ax2.set_ylabel('NDCG')
 
-    ax3.plot([np.mean(train_ndcg[epoch]) for epoch in train_ndcg], label='train')
-    ax3.plot([np.mean(valid_ndcg[epoch]) for epoch in valid_ndcg], label='valid')
+    ax3.plot([np.mean(train_err[epoch]) for epoch in train_err], label='train')
+    ax3.plot([np.mean(valid_err[epoch]) for epoch in valid_err], label='valid')
     ax3.set_xlabel('Epoch')
-    ax3.set_ylabel('NDCG')
+    ax3.set_ylabel('ERR')
     
     ax1.grid(linewidth=0.5, linestyle='--')
     ax1.legend()
@@ -261,10 +260,8 @@ def plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, va
 def hyper_param_search(train_dl, valid_dl):
     #hyper param search
 
-    learning_rates = [5e-6, 1e-5, 1e-4, 1e-3]
-    # learning_rates = [1e-4]
+    learning_rates = [0.001, 0.005, 0.01, 0.05]
     sigmas = [0, 0.25, .5, 1.]
-    # sigmas = [1.]
     metrics = ['NDCG']#, 'ERR']
 
     configs = [
@@ -284,7 +281,7 @@ def hyper_param_search(train_dl, valid_dl):
             train_dl = train_dl,
             valid_dl = valid_dl, 
             config = config, 
-            max_epochs=3,
+            max_epochs=10,
             early_stopping_metric='NDCG',
             patience=2,
             verbose=False
@@ -305,7 +302,7 @@ def hyper_param_search(train_dl, valid_dl):
             print(f'[{time.ctime()}] Improved ERR to {eval_err} using {config}')
 
 
-    return config[best_ndcg_config], config[best_err_config]
+    return configs[best_ndcg_config], configs[best_err_config]
 
 
 def early_stopping(valid_results, patience = 0, objective = 'max'):
@@ -324,10 +321,7 @@ def early_stopping(valid_results, patience = 0, objective = 'max'):
     
     means = [np.mean(valid_results[epoch]) for epoch in valid_results]
     cur_epoch = len(means)
-    diff = np.diff(means)
-    
-    print(means, diff)
-    
+    diff = np.diff(means)    
    
     if objective == 'max':
         last_improvement = len(diff) - diff[::-1].argmax() + 1
@@ -344,40 +338,40 @@ def early_stopping(valid_results, patience = 0, objective = 'max'):
 
 
 
-def evaluate(model, dataloader, name):
+def evaluate(model, config, dataloader, name):
     results = defaultdict(list)
 
-    with tqdm(total=len(dataloader)) as t:
-        with torch.no_grad():
-            model.eval()
-            for ix, (X,y) in enumerate(dataloader):
-                X = X.to(device).float().squeeze(0)
-                y = y.to(device).float().squeeze(0)
+    critereon = LambdaRankLoss(sigma=config['sigma'], metric=config['metric'])
 
-                y_hat = model(X).sigmoid().squeeze(1)
+    with torch.no_grad():
+        model.eval()
+        for ix, (X,y) in enumerate(dataloader):
+            X = X.to(device).float().squeeze(0)
+            y = y.to(device).float().squeeze(0)
 
-                # compute metrics
-                loss = critereon(y_hat, y)
-                ndcg_batch = ndcg(y_hat, y).item()
-                err_batch = err(y_hat, y).item()
-                results['test_loss'].append(loss.item())
-                results['test_ndcg'].append(ndcg_batch)
-                results['test_err'].append(err_batch)
-                
-                t.update()
-                if ix % 50 == 0:
-                    t.set_postfix_str(f'TEST: loss {loss.item():.3f}\t NDCG: {ndcg_batch:.3f}\t ERR: {err_batch:.3f}')
+            y_hat = model(X).sigmoid().squeeze(1)
+
+            # compute metrics
+            loss = critereon(y_hat, y)
+            ndcg_batch = ndcg(y_hat, y).item()
+            err_batch = err(y_hat, y).item()
+            results['test_loss'].append(loss.item())
+            results['test_ndcg'].append(ndcg_batch)
+            results['test_err'].append(err_batch)
+            
 
         mean_test_ndcg = np.mean(results['test_ndcg'])
         mean_test_loss = np.mean(results['test_loss'])
         mean_test_err  = np.mean(results['test_err'])
-
-        t.set_postfix_str(f'TEST: loss {mean_test_loss:.3f}\t NDCG: {mean_test_ndcg:.3f}\t ERR: {mean_test_err:.3f}')
     
     with open(f'results/results_{name}.pkl', 'wb') as f:
-        pickle.dump(results)
+        pickle.dump(results, f)
 
-    return test_loss, test_ndcg, test_err
+    print(f"Loss: {np.mean(results['test_loss'])}, sd: {np.std(results['test_loss'])}")
+    print(f"NDCG: {np.mean(results['test_ndcg'])}, sd: {np.std(results['test_ndcg'])}")
+    print(f"ERR: {np.mean(results['test_err'])}, sd: {np.std(results['test_err'])}")
+
+    return results
 
 
 if __name__ == '__main__':
@@ -412,29 +406,28 @@ if __name__ == '__main__':
 
 
     # train models for optimal configs for NDCG and ERR
-
     print(f'[{time.ctime()}] Training optimal NDCG model')
     best_ndcg_model, _, _ = train(
             train_dl = train_dl,
             valid_dl = valid_dl, 
             config = best_ndcg_config, 
-            max_epochs=3,
+            max_epochs=15,
             early_stopping_metric='NDCG',
             patience=1,
-            verbose=True,
+            verbose=False,
             plot=True,
             name='best_ndcg'
     )
 
     print(f'[{time.ctime()}] Training optimal ERR model')
-    best_ndcg_model, _, _ = train(
+    best_err_model, _, _ = train(
             train_dl = train_dl,
             valid_dl = valid_dl, 
             config = best_err_config, 
-            max_epochs=3,
+            max_epochs=15,
             early_stopping_metric='ERR',
             patience=1,
-            verbose=True,
+            verbose=False,
             plot=True,
             name='best_err'
     )
@@ -447,8 +440,8 @@ if __name__ == '__main__':
 
     # eval on test set
     print(f'[{time.ctime()}] Evaluating best models on test set')
-    results_ndcg = evaluate(best_ndcg_model, test_dl, name='best_ndcg')
-    results_err = evaluate(best_err_model, test_dl, name='best_err')
+    results_ndcg = evaluate(best_ndcg_model, best_ndcg_config, test_dl, name='best_ndcg')
+    results_err = evaluate(best_err_model, best_err_config, test_dl, name='best_err')
 
 
 

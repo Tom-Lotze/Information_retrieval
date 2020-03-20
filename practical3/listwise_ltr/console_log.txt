@@ -1,0 +1,39 @@
+[Thu Mar 19 13:51:29 2020] Start hyper opt search
+
+  0%|          | 0/16 [00:00<?, ?it/s][Thu Mar 19 14:20:00 2020] Improved NDCG to 0.7489203439382578 using {'learning_rate': 0.001, 'sigma': 0, 'metric': 'NDCG'}
+  6%|6         | 1/16 [28:30<7:07:38, 1710.57s/it]
+[Thu Mar 19 14:20:00 2020] Improved ERR to 0.2735918801614481 using {'learning_rate': 0.001, 'sigma': 0, 'metric': 'NDCG'}
+[Thu Mar 19 14:49:09 2020] Improved NDCG to 0.7674348323670989 using {'learning_rate': 0.001, 'sigma': 0.25, 'metric': 'NDCG'}
+[Thu Mar 19 14:49:09 2020] Improved ERR to 0.2753872799243986 using {'learning_rate': 0.001, 'sigma': 0.25, 'metric': 'NDCG'}
+
+ 12%|#2        | 2/16 [57:39<6:41:47, 1721.98s/it][Thu Mar 19 15:16:31 2020] Improved NDCG to 0.7678739660725401 using {'learning_rate': 0.001, 'sigma': 0.5, 'metric': 'NDCG'}
+[Thu Mar 19 15:16:31 2020] Improved ERR to 0.2784318692520581 using {'learning_rate': 0.001, 'sigma': 0.5, 'metric': 'NDCG'}
+
+ 19%|#8        | 3/16 [1:25:01<6:07:54, 1698.05s/it][Thu Mar 19 15:43:31 2020] Improved NDCG to 0.7683043210274633 using {'learning_rate': 0.001, 'sigma': 1.0, 'metric': 'NDCG'}
+
+ 25%|##5       | 4/16 [1:52:01<5:34:57, 1674.76s/it]
+ 31%|###1      | 5/16 [2:19:04<5:04:10, 1659.13s/it][Thu Mar 19 16:37:27 2020] Improved NDCG to 0.7919903529743825 using {'learning_rate': 0.005, 'sigma': 0.25, 'metric': 'NDCG'}
+[Thu Mar 19 16:37:27 2020] Improved ERR to 0.3050991726883323 using {'learning_rate': 0.005, 'sigma': 0.25, 'metric': 'NDCG'}
+
+ 38%|###7      | 6/16 [2:45:57<4:34:13, 1645.36s/it]
+ 44%|####3     | 7/16 [3:13:20<4:06:42, 1644.68s/it]
+ 50%|#####     | 8/16 [3:41:01<3:39:55, 1649.48s/it]
+ 56%|#####6    | 9/16 [4:08:26<3:12:18, 1648.29s/it]
+ 62%|######2   | 10/16 [4:35:25<2:43:55, 1639.31s/it]
+ 69%|######8   | 11/16 [5:02:02<2:15:33, 1626.77s/it]
+ 75%|#######5  | 12/16 [5:28:37<1:47:49, 1617.27s/it]
+ 81%|########1 | 13/16 [5:55:12<1:20:31, 1610.34s/it]
+ 88%|########7 | 14/16 [6:21:47<53:31, 1605.90s/it]  
+ 94%|#########3| 15/16 [6:48:31<26:45, 1605.37s/it]
+100%|##########| 16/16 [7:15:10<00:00, 1603.39s/it]
+[Thu Mar 19 21:06:40 2020] Training optimal NDCG model
+[Thu Mar 19 21:46:49 2020] Training optimal ERR model
+[Thu Mar 19 22:26:52 2020] Saving models
+[Thu Mar 19 22:26:52 2020] Evaluating best models on test set
+Loss: 911.602429708742, sd: 1388.0874590247502
+NDCG: 0.7763887441628299, sd: 0.14773849814677564
+ERR: 0.3092889934886953, sd: 0.22953520611225864
+Loss: 911.6371418256097, sd: 1387.6345580780917
+NDCG: 0.7648590842645282, sd: 0.14889458376748965
+ERR: 0.2957260162332879, sd: 0.2180725095449464
+[Finished in 30976.8s]
