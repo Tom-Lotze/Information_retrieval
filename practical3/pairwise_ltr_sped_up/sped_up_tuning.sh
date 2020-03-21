@@ -13,7 +13,7 @@ do
     for lr in "${lr_list[@]}"
     do
         echo "hidden units: $h_u, learning rate: $lr"
-        python pairwise_ltr_sped_up/pairwise_ltr_sped_up.py --hidden_units "$h_u" --learning_rate "$lr" --plot 1
+        python pairwise_ltr_sped_up/pairwise_ltr_sped_up.py --hidden_units "$h_u" --learning_rate "$lr" --plot 1 --valid_each 1000
          >> pairwise_ltr_sped_up/json_files/gridsearch_results.txt
     done
 done
