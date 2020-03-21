@@ -175,7 +175,7 @@ def train(data, FLAGS):
 
 
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, "ARR_NDCG.png")
+        plot_ndcg(validation_results, "ARR_NDCG.png")
 
     if FLAGS.plot_ARR_nDCG:
         plot_ARR_nDCG(validation_results, figure_name)
@@ -189,7 +189,7 @@ def train(data, FLAGS):
         print(f"Results are saved in the json_files folder")
 
 
-def plot_loss_ndcg(ndcg, figname):
+def plot_ndcg(ndcg, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
@@ -233,8 +233,6 @@ def plot_ARR_nDCG(results, figname):
 
 
 if __name__ == "__main__":
-    # currently importing dataset here as pep8 would move it to the
-    # top messing up the sys.path code
     import dataset
     import evaluate as evl
 
