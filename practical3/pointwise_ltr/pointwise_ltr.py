@@ -60,7 +60,6 @@ class Pointwise(nn.Module):
             x = self.relu(x)
 
         out = self.layers[-1](x)
-        #out = self.softmax(x)
 
         return out
 
@@ -254,7 +253,6 @@ if __name__ == "__main__":
     # set seeds for reproducibility
     np.random.seed(42)
     torch.manual_seed(42)
-
 
     # import the data
     data = dataset.get_dataset().get_data_folds()[0]

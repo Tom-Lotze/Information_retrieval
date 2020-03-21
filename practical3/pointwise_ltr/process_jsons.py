@@ -22,12 +22,12 @@ def process_json():
         ndcg_on_test[file] = ndcg_score
 
 
-    max_ndcg_40_key = max(ndcg_on_test.keys(), key=lambda key: ndcg_on_test[key])
-    max_value = ndcg_on_test[max_ndcg_40_key]
-    average_ndcg_40 = np.mean(list(ndcg_on_test.values()))
-    var_ndcg_40 = np.var(list(ndcg_on_test.values()))
+    max_ndcg_key = max(ndcg_on_test.keys(), key=lambda key: ndcg_on_test[key])
+    max_value = ndcg_on_test[max_ndcg_key]
+    average_ndcg = np.mean(list(ndcg_on_test.values()))
+    var_ndcg = np.var(list(ndcg_on_test.values()))
 
-    return max_ndcg_40_key, max_value, average_ndcg_40, var_ndcg_40
+    return max_ndcg_key, max_value, average_ndcg, var_ndcg
 
 if __name__ == "__main__":
     best_setting, best_ndcg, average, variance = process_json()

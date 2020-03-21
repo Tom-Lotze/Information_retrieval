@@ -40,6 +40,7 @@ def plot(counter, title):
     plt.title(title)
     plt.xlabel("Relevance class")
     plt.ylabel("Frequency")
+    plt.savefig(f"pointwise_LTR/distribution/{title}.png")
 
 
 if __name__ == "__main__":
@@ -64,4 +65,3 @@ if __name__ == "__main__":
     plot(actual_dist_valid, "Validation set")
     plot(pred_dist, "Distribution of predicted labels of test set")
 
-    plt.show()
