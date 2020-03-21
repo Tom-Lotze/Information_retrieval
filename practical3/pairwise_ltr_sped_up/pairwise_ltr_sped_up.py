@@ -108,7 +108,7 @@ def train(data, FLAGS):
 
     filename_validation_results = f"./pairwise_ltr_sped_up/json_files/pairwise_{n_hidden}_{FLAGS.learning_rate}.json"
     filename_test_results = f"./pairwise_ltr_sped_up/json_files/pairwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
-    figure_name = f"{n_hidden}_{FLAGS.learning_rate}.png"
+    figure_name = f"Sped_up_{n_hidden}_{FLAGS.learning_rate}.png"
 
     overall_step = 0
 
@@ -204,7 +204,7 @@ def plot_loss_ndcg(ndcg, figname):
     plt.tick_params(axis='y')
     plt.legend()
 
-    plt.title("nDCG and training loss for Sped up Pairwise LTR")
+    plt.title("nDCG for Sped-up Pairwise LTR")
     plt.tight_layout()
     plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
 
@@ -223,11 +223,11 @@ if __name__ == "__main__":
     data.read_data()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hidden_units', type=int, default=256,
+    parser.add_argument('--hidden_units', type=int, default=128,
                         help=('Integer specifying number of hidden units in '
                               'hidden layer'))
     parser.add_argument('--learning_rate', type=float,
-                        default=0.001, help='Learning rate')
+                        default=0.005, help='Learning rate')
     parser.add_argument('--max_epochs', type=int,
                         default=10, help='Max number of epochs')
     parser.add_argument("--save", type=int, default=1,
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     parser.add_argument("--plot", type=int, default=1,
                         help=("Either 1 or 0 (bool) to create a plot "
                               "of ndcg and loss"))
-    parser.add_argument("--valid_each", type=int, default=30,
+    parser.add_argument("--valid_each", type=int, default=100,
                         help=("Run the model on the validation "
                               "set every x steps"))
     parser.add_argument("--early_stopping_threshold", type=float, default=0.0,
