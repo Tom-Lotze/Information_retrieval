@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import torch.nn as nn
 import matplotlib.pyplot as plt
+import pandas as pd
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 # from torch.autograd import Variable
@@ -14,8 +15,8 @@ sys.path.append('..')
 sys.path.append('.')
 
 
-class RankNet(nn.Module):
-    """ Pairwise LTR model """
+class Listwise(nn.Module):
+    """ Listwise LTR model """
 
     def __init__(self, input_dim,  n_hidden=256,  output_dim=1):
         """
@@ -24,7 +25,7 @@ class RankNet(nn.Module):
         n_hidden: dimensionality of hidden layer
         n_outputs: output dimensionality
         """
-        super(RankNet, self).__init__()
+        super(Listwise, self).__init__()
 
         self.input_dim = input_dim
         self.n_hidden = n_hidden
@@ -46,12 +47,10 @@ class RankNet(nn.Module):
         h_i = self.sigmoid(self.fc1(x_batch))
         s_i = self.sigmoid(self.fc2(h_i))
 
-        diff_mat = self.sigmoid(torch.add(s_i.t(), -s_i))
-
-        return diff_mat
+        return s_i
 
     def single_foward(self, x_batch):
-
+        """ Single forward pass"""
         h_i = self.sigmoid(self.fc1(x_batch))
         s_i = self.sigmoid(self.fc2(h_i))
 
@@ -78,6 +77,34 @@ class RankNet(nn.Module):
         return results
 
 
+def delta_dcg_at_k(y, denom_order):
+
+    k_t = denom_order.float().unsqueeze(1)
+    y = y.unsqueeze(1)
+    discount = (1 / torch.log2(k_t + 2) -
+                (1 / torch.log2(k_t.t() + 2)))
+
+    gain = torch.pow(2.0, y) - \
+        torch.pow(2.0, y.t())
+
+    dcg = discount * gain
+
+    return(abs(dcg))
+
+
+def dcg_at_k(sorted_labels):
+
+    k = sorted_labels.shape[0]
+    discount = 1 / torch.log2(torch.arange(k).float()+2)
+    gain = 2 ** sorted_labels - 1
+    dcg = torch.sum(discount*gain)
+    return dcg
+
+
+def delta_ndcg_at_k(y, denom_order, ideal_labels):
+    return delta_dcg_at_k(y, denom_order) / dcg_at_k(ideal_labels)
+
+
 def weights_init(model):
     """ Initialize weights """
     if isinstance(model, nn.Linear):
@@ -90,8 +117,9 @@ def train(data, FLAGS):
 
     n_hidden = FLAGS.hidden_units
     n_epochs = FLAGS.max_epochs
+    metric = FLAGS.metric
 
-    model = RankNet(data.num_features, n_hidden, 1)
+    model = Listwise(data.num_features, n_hidden, 1)
     model.apply(weights_init)
 
     train_dataset = dataset.ListDataSet(data.train)
@@ -99,14 +127,15 @@ def train(data, FLAGS):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=FLAGS.learning_rate)
 
-    loss_function = nn.BCELoss(reduction='mean')
-
-    # training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
 
-    filename_validation_results = f"./pairwise_ltr/json_files/pairwise_{n_hidden}_{FLAGS.learning_rate}.json"
-    filename_test_results = f"./pairwise_ltr/json_files/pairwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
+    filename_validation_results = (f"./listwise_berend/json_files/"
+                                   f"pairwise_{n_hidden}_"
+                                   f"{FLAGS.learning_rate}.json")
+    filename_test_results = (f"./listwise_berend/json_files/"
+                             f"listwise_TEST_{n_hidden}_"
+                             f"{FLAGS.learning_rate}.json")
     figure_name = f"{n_hidden}_{FLAGS.learning_rate}.png"
 
     overall_step = 0
@@ -125,32 +154,67 @@ def train(data, FLAGS):
                 if x_batch.shape[1] == 1:
                     continue
 
-                # squeeze batch
+                # prepare batches
                 x_batch = x_batch.float().squeeze()
                 y_batch = y_batch.float().t()
 
-                labels_mat = y_batch.t() - y_batch
+                y_batch.sort(descending=True)
 
-                labels_mat[labels_mat > 0] = 1
-                labels_mat[labels_mat == 0] = (1/2)
-                labels_mat[labels_mat < 0] = 0
+                # Define factoriaztion
+                S = y_batch - y_batch.t()
 
-                diff_scores = model(x_batch)
+                S[S > 0] = 1
+                S[S == 0] = 0
+                S[S < 0] = -1
 
-                loss = loss_function(diff_scores, labels_mat)
+                # compute document scores
+                scores = model(x_batch)
+
+                # get document score differences
+                diff_mat = torch.sigmoid(torch.add(scores, -scores.t()))
+
+                # calculate lambda ij
+                lambda_ij = (
+                    1 * ((1/2) * (1 - S) - diff_mat))
 
                 if overall_step % FLAGS.valid_each == 0:
+                    # print(lambda_ij)
                     model.eval()
                     valid_results = model.evaluate_on_validation(data)
                     validation_results[overall_step] = valid_results
                     ndcg_per_epoch[epoch][step] = valid_results['ndcg'][0]
-
                     t.set_postfix_str(
-                        f'loss: {loss.mean().item():3f} ndcg: {valid_results["ndcg"][0]:3f}')
+                        (f'ndcg: '
+                         f' {valid_results["ndcg"][0]: 3f}'))
 
-                # backward pass
-                loss.backward()
+                if metric == "NDCG":
+                    clone_scores = scores.clone().detach()
+                    # inspired by https://github.com/haowei01/pytorch-examples/blob/6c217bb995db6bc33a13f4828035f51365ed0eb9/ranking/LambdaRank.py#L57
+                    rank_df = pd.DataFrame(
+                        {'scores': clone_scores, 'doc': np.arange(clone_scores.shape[0])})
+                    rank_df = rank_df.sort_values(
+                        'scores', ascending=False).reset_index(drop=True)
+                    rank_order = rank_df.sort_values('doc').index.values
 
+                    if (y_batch == 0).all():
+                        continue
+
+                    denom_order = torch.Tensor(rank_order)
+                    ideal_labels, _ = y_batch.sort(descending=True, dim=0)
+                    delta_ndcg = delta_ndcg_at_k(
+                        y_batch.squeeze().float(), denom_order, ideal_labels.squeeze().float())
+
+                    lambda_ij *= delta_ndcg
+
+                elif metric == "ERR":
+                    raise NotImplementedError
+                else:
+                    raise NotImplementedError
+
+                lambda_i = lambda_ij.sum(dim=1)
+
+                scores.squeeze().backward(lambda_i)
+                # print(model.fc1.weight.grad)
                 # optimizer step
                 optimizer.step()
 
@@ -160,7 +224,8 @@ def train(data, FLAGS):
 
             if epoch % 1 == 0 and FLAGS.save:
                 filename_model = (
-                    f"./pairwise_ltr/models/pairwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt")
+                    f"./listwise_berend/models/listwise_{n_hidden}"
+                    f"_{epoch}_{FLAGS.learning_rate}.pt")
                 torch.save(model.state_dict(), filename_model)
                 print(f"Model is saved as {filename_model}")
 
@@ -178,7 +243,7 @@ def train(data, FLAGS):
 
     # save results
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, training_losses, figure_name)
+        plot_loss_ndcg(validation_results, figure_name)
 
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
@@ -188,7 +253,7 @@ def train(data, FLAGS):
         print(f"Results are saved in the json_files folder")
 
 
-def plot_loss_ndcg(ndcg, loss, figname):
+def plot_loss_ndcg(ndcg, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
@@ -200,9 +265,9 @@ def plot_loss_ndcg(ndcg, loss, figname):
     plt.tick_params(axis='y')
     plt.legend()
 
-    plt.title("nDCG for Pairwise LTR")
+    plt.title("nDCG and training loss for NDCG-LambdaRank")
     plt.tight_layout()
-    plt.savefig(f"pairwise_ltr/figures/{figname}")
+    plt.savefig(f"listwise_berend/figures/{figname}")
 
 
 if __name__ == "__main__":
@@ -240,6 +305,9 @@ if __name__ == "__main__":
     parser.add_argument("--save_pred", type=int, default=0,
                         help=("Boolean (0, 1) whether to save the "
                               "predictions on the test set"))
+    parser.add_argument("--metric", type=str, default='NDCG',
+                        help=("Choose metric to optimize."
+                              "NDCG or ERR"))
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
@@ -259,9 +327,9 @@ if __name__ == "__main__":
     print('Number of documents in test set: %d' % data.test.num_docs())
 
     # create necessary datasets
-    os.makedirs("pairwise_ltr/models", exist_ok=True)
-    os.makedirs("pairwise_ltr/json_files", exist_ok=True)
-    os.makedirs("pairwise_ltr/figures", exist_ok=True)
+    os.makedirs("listwise_berend/models", exist_ok=True)
+    os.makedirs("listwise_berend/json_files", exist_ok=True)
+    os.makedirs("listwise_berend/figures", exist_ok=True)
 
     # train model
     train(data, FLAGS)

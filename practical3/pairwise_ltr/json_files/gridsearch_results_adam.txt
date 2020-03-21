@@ -1,0 +1,143 @@
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_128_0_0.001.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_1_0.001.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_2_0.001.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_128_0_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_1_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_2_0.01.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_128_0_0.005.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_1_0.005.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_2_0.005.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_128_0_0.05.pt
+Model is saved as ./pairwise_ltr/models/pairwise_128_1_0.05.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_256_0_0.001.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_1_0.001.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_256_0_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_1_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_2_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_3_0.01.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_256_0_0.005.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_1_0.005.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_256_0_0.05.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_1_0.05.pt
+Model is saved as ./pairwise_ltr/models/pairwise_256_2_0.05.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_512_0_0.001.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_1_0.001.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_512_0_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_1_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_2_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_3_0.01.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_4_0.01.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_512_0_0.005.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_1_0.005.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_2_0.005.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./pairwise_ltr/models/pairwise_512_0_0.05.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_1_0.05.pt
+Model is saved as ./pairwise_ltr/models/pairwise_512_2_0.05.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
