@@ -13,7 +13,7 @@ do
     for lr in "${lr_list[@]}"
     do
         echo "hidden units: $h_u, learning rate: $lr"
-        python listwise_berend/listwise_berend.py --hidden_units "$h_u"\
+        python listwise_berend/listwisFpe_berend.py --hidden_units "$h_u"\
          --learning_rate "$lr" --valid_each 1000 --plot 1\
          >> listwise_berend/json_files/gridsearch_results.txt
     done

@@ -13,7 +13,8 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 sys.path.append('..')
 sys.path.append('.')
-
+import evaluate as evl
+import dataset
 
 class Listwise(nn.Module):
     """ Listwise LTR model """
@@ -70,11 +71,11 @@ class Listwise(nn.Module):
         """ Evaluate on test set """
         test_data = data.test
         with torch.no_grad():
-            test_scores = self.single_foward(
+            test_scores = self.forward(
                 torch.Tensor(test_data.feature_matrix))
-            test_scores = test_scores.numpy().squeeze()
-            results = evl.evaluate(test_data, test_scores)
-        return results
+            test_scores_np = test_scores.numpy().squeeze()
+            results = evl.evaluate(test_data, test_scores_np)
+        return test_scores, results
 
 
 def delta_dcg_at_k(y, denom_order):
@@ -105,6 +106,38 @@ def delta_ndcg_at_k(y, denom_order, ideal_labels):
     return delta_dcg_at_k(y, denom_order) / dcg_at_k(ideal_labels)
 
 
+def err(scores, test_labels):
+
+    R = test_labels[scores.sort(descending=True, dim=0).indices]
+
+    r = torch.arange(R.shape[0]) + 1
+    denom = 2 ** 4
+    Ri = torch.Tensor((2 ** R - 1) / denom)
+
+    prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
+    err = torch.sum(Ri * prod / r)
+
+    return err
+
+
+def d_err(y, scores, denom_order):
+
+    R = y[scores.sort(descending=True, dim=0).indices]
+
+    r = torch.arange(R.shape[0]) + 1
+
+    denom = 2 ** 4
+
+    Ri = (2 ** R - 1) / denom
+
+    prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
+    err = Ri * prod / r
+
+    err_unsorted = err[denom_order].unsqueeze(1)
+
+    return(abs(err_unsorted - err_unsorted.t()))
+
+
 def weights_init(model):
     """ Initialize weights """
     if isinstance(model, nn.Linear):
@@ -131,12 +164,12 @@ def train(data, FLAGS):
     ndcg_per_epoch = {}
 
     filename_validation_results = (f"./listwise_berend/json_files/"
-                                   f"pairwise_{n_hidden}_"
-                                   f"{FLAGS.learning_rate}.json")
+                                   f"listwise_{n_hidden}_"
+                                   f"{FLAGS.learning_rate}_{metric}.json")
     filename_test_results = (f"./listwise_berend/json_files/"
                              f"listwise_TEST_{n_hidden}_"
-                             f"{FLAGS.learning_rate}.json")
-    figure_name = f"{n_hidden}_{FLAGS.learning_rate}.png"
+                             f"{FLAGS.learning_rate}_{metric}.json")
+    figure_name = f"{n_hidden}_{FLAGS.learning_rate}_{metric}.png"
 
     overall_step = 0
 
@@ -207,7 +240,21 @@ def train(data, FLAGS):
                     lambda_ij *= delta_ndcg
 
                 elif metric == "ERR":
-                    raise NotImplementedError
+                    clone_scores = scores.clone().detach()
+                    # inspired by https://github.com/haowei01/pytorch-examples/blob/6c217bb995db6bc33a13f4828035f51365ed0eb9/ranking/LambdaRank.py#L57
+                    rank_df = pd.DataFrame(
+                        {'scores': clone_scores, 'doc': np.arange(clone_scores.shape[0])})
+                    rank_df = rank_df.sort_values(
+                        'scores', ascending=False).reset_index(drop=True)
+                    rank_order = rank_df.sort_values('doc').index.values
+
+                    denom_order = torch.Tensor(rank_order).long()
+
+                    delta_err = d_err(y_batch.squeeze(),
+                                      clone_scores.squeeze(), denom_order)
+
+                    lambda_ij *= delta_err
+
                 else:
                     raise NotImplementedError
 
@@ -225,7 +272,7 @@ def train(data, FLAGS):
             if epoch % 1 == 0 and FLAGS.save:
                 filename_model = (
                     f"./listwise_berend/models/listwise_{n_hidden}"
-                    f"_{epoch}_{FLAGS.learning_rate}.pt")
+                    f"_{epoch}_{FLAGS.learning_rate}_{metric}.pt")
                 torch.save(model.state_dict(), filename_model)
                 print(f"Model is saved as {filename_model}")
 
@@ -249,7 +296,7 @@ def train(data, FLAGS):
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
         with open(filename_test_results, "w") as writer:
-            json.dump(model.evaluate_on_test(data), writer, indent=1)
+            json.dump(model.evaluate_on_test(data)[1], writer, indent=1)
         print(f"Results are saved in the json_files folder")
 
 
@@ -265,7 +312,7 @@ def plot_loss_ndcg(ndcg, figname):
     plt.tick_params(axis='y')
     plt.legend()
 
-    plt.title("nDCG and training loss for NDCG-LambdaRank")
+    plt.title("nDCG for NDCG-LambdaRank")
     plt.tight_layout()
     plt.savefig(f"listwise_berend/figures/{figname}")
 
@@ -273,8 +320,6 @@ def plot_loss_ndcg(ndcg, figname):
 if __name__ == "__main__":
     # currently importing dataset here as pep8 would move it to the
     # top messing up the sys.path code
-    import dataset
-    import evaluate as evl
 
     np.random.seed(42)
     torch.manual_seed(42)

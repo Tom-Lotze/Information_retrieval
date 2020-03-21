@@ -9,9 +9,14 @@ import torch
 import argparse
 import json
 import os
+
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
 sys.path.append('..')
 sys.path.append('.')
+
+import dataset
+import evaluate as evl
 
 
 class RankNet(nn.Module):
@@ -71,11 +76,32 @@ class RankNet(nn.Module):
         """ Evaluate on test set """
         test_data = data.test
         with torch.no_grad():
-            test_scores = self.single_foward(
+            test_scores = self.forward(
                 torch.Tensor(test_data.feature_matrix))
-            test_scores = test_scores.numpy().squeeze()
-            results = evl.evaluate(test_data, test_scores)
-        return results
+            test_scores_np = test_scores.numpy().squeeze()
+            results = evl.evaluate(test_data, test_scores_np)
+        return test_scores, results
+    # def evaluate_on_test(self, data):
+    #     """ Evaluate on test set """
+    #     test_data = data.test
+    #     with torch.no_grad():
+    #         test_scores = self.single_foward(
+    #             torch.Tensor(test_data.feature_matrix))
+    #         test_scores = test_scores.numpy().squeeze()
+    #         results = evl.evaluate(test_data, test_scores)
+    #     return results
+    def err(scores, test_labels):
+
+        R = test_labels[scores.sort(descending=True, dim=0).indices]
+
+        r = torch.arange(R.shape[0]) + 1
+        denom = 2 ** 4
+        Ri = torch.Tensor((2 ** R - 1) / denom)
+
+        prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
+        err = torch.sum(Ri * prod / r)
+
+        return err
 
 
 def weights_init(model):
@@ -84,6 +110,7 @@ def weights_init(model):
         nn.init.xavier_uniform_(model.weight.data)
         if model.bias is not None:
             torch.nn.init.zeros_(model.bias)
+
 
 
 def train(data, FLAGS):
@@ -169,7 +196,7 @@ def train(data, FLAGS):
                 mean_prev_epoch = np.mean(
                     list(ndcg_per_epoch[epoch-1].values()))
                 mean_curr_epoch = np.mean(list(ndcg_per_epoch[epoch].values()))
-                # print(mean_prev_epoch, mean_curr_epoch)
+
                 if (mean_curr_epoch <= mean_prev_epoch +
                         FLAGS.early_stopping_threshold):
                     print("Early stopping condition satistied, "
@@ -178,17 +205,24 @@ def train(data, FLAGS):
 
     # save results
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, training_losses, figure_name)
+        plot_loss_ndcg(validation_results, figure_name)
 
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
         with open(filename_test_results, "w") as writer:
-            json.dump(model.evaluate_on_test(data), writer, indent=1)
+            json.dump(model.evaluate_on_test(data)[1], writer, indent=1)
         print(f"Results are saved in the json_files folder")
 
+    # if FLAGS.save:
+    #     with open(filename_validation_results, "w") as writer:
+    #         json.dump(validation_results, writer, indent=1)
+    #     with open(filename_test_results, "w") as writer:
+    #         json.dump(model.evaluate_on_test(data), writer, indent=1)
+    #     print(f"Results are saved in the json_files folder")
 
-def plot_loss_ndcg(ndcg, loss, figname):
+
+def plot_loss_ndcg(ndcg, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
@@ -206,10 +240,6 @@ def plot_loss_ndcg(ndcg, loss, figname):
 
 
 if __name__ == "__main__":
-    # currently importing dataset here as pep8 would move it to the
-    # top messing up the sys.path code
-    import dataset
-    import evaluate as evl
 
     np.random.seed(42)
     torch.manual_seed(42)

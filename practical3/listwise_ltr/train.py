@@ -1,3 +1,5 @@
+
+
 import listwise_ltr
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -5,108 +7,112 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from collections import defaultdict
 import numpy as np
-import time, sys, os, pickle
+import time
+import sys
+import os
+import pickle
 sys.path.append('..')
-import dataset
-
-
 
 
 def ndcg(y_hat, y):
-    
+
     def dcg(y_hat, y):
         sort_indices = y_hat.sort(descending=True)[1]
-        
-        return ( (2**y[sort_indices].float()-1) / torch.arange(2, len(y)+2).to(device).float().log() ).sum()
+
+        return ((2**y[sort_indices].float()-1) / torch.arange(2, len(y)+2).to(device).float().log()).sum()
     norm = dcg(y, y)
     if norm == 0:
         return torch.tensor(1)
     else:
         return dcg(y_hat, y) / norm
-    
+
+
 def err(y_hat, y):
     R = y[y_hat.sort(descending=True).indices]
     Nd = len(R)
-    
-    phi = torch.arange(1,Nd+1).to(device)
+
+    phi = torch.arange(1, Nd+1).to(device)
     p = (2**R-1) / 2**4
     prob_stopping = torch.cumprod(1-p, 0) / (1-p[0]) * p
-    return (prob_stopping/phi).sum()    
+    return (prob_stopping/phi).sum()
 
 
 def delta_ndcg(y_hat, y):
-    
+
     indices = y_hat.sort(descending=True).indices
     R_true = y.sort(descending=True).values
     R = y[indices]
 
-    alpha = ( (2 ** R_true - 1) / torch.arange(2, len(y)+2).float().log2().to(device) ).sum()
+    alpha = ((2 ** R_true - 1) / torch.arange(2,
+                                              len(y)+2).float().log2().to(device)).sum()
 
     if alpha.item() == 0:
         return torch.ones_like(R)
     else:
         Nd = len(y_hat)
 
-        Delta  = ((2**R-1).unsqueeze(1) / torch.arange(2, len(R)+2).float().log2().to(device) )
-        ddcg = (Delta.sum(dim=1) + Delta.sum(dim=0) - Delta.diag() * Nd - Delta.diag().sum())/alpha
-    
+        Delta = ((2**R-1).unsqueeze(1) / torch.arange(2,
+                                                      len(R)+2).float().log2().to(device))
+        ddcg = (Delta.sum(dim=1) + Delta.sum(dim=0) -
+                Delta.diag() * Nd - Delta.diag().sum())/alpha
+
         return ddcg[indices] / alpha
-    
-    
+
+
 def delta_err(y_hat, y):
     R = y[y_hat.sort(descending=True).indices]
     Nd = len(R)
     D = torch.zeros(Nd, Nd, Nd).to(device)
-    
-    phi = torch.arange(1,Nd+1).to(device)
+
+    phi = torch.arange(1, Nd+1).to(device)
     p = (2**R-1) / 2**4
-    
+
     for i in range(Nd):
         for j in range(i+1, Nd):
-            
+
             # swap indices
             p = p.clone()
             p[i], p[j] = p[j].item(), p[i].item()
-                        
+
             prob_stopping = torch.cumprod(1-p, 0) / (1-p[0]) * p
-            D[i,j,:] = D[j,i,:] = prob_stopping
-    
-    D = (D / phi).sum(dim=[1,2])
-            
+            D[i, j, :] = D[j, i, :] = prob_stopping
+
+    D = (D / phi).sum(dim=[1, 2])
+
     return D
 
 
-class LambdaRankFunction(torch.autograd.Function):        
-    
+class LambdaRankFunction(torch.autograd.Function):
+
     @staticmethod
     def forward(ctx, y_hat, y, sigma, metric):
-        
+
         S = (y.unsqueeze(1) - y.t()).clamp(-1, 1)
         D = y_hat.unsqueeze(1) - y_hat.t()
-        
+
         ctx.save_for_backward(S, D, y_hat, y)
         ctx.sigma = sigma
         ctx.metric = metric
-        
-        loss = .5 * (1-S) * sigma * D + torch.log2(1+ torch.exp(-sigma*D))
-            
+
+        loss = .5 * (1-S) * sigma * D + torch.log2(1 + torch.exp(-sigma*D))
+
         return loss.sum()
-    
+
     @staticmethod
     def backward(ctx, grad_output):
         S, D, y_hat, y = ctx.saved_tensors
-        
+
         Lambda = ctx.sigma * (.5 * (1-S) - 1 / (1+torch.exp(-ctx.sigma*D)))
-        
+
         if ctx.metric == 'NDCG':
             dirm = delta_ndcg(y_hat, y)
         elif ctx.metric == 'ERR':
             dirm = delta_err(y_hat, y)
         else:
             raise NotImplementedError()
-        
-        dy_hat = Lambda.sum(dim=1) * dirm.abs()           
-        
+
+        dy_hat = Lambda.sum(dim=1) * dirm.abs()
+
         return dy_hat, None, None, None
 
 
@@ -115,15 +121,14 @@ class LambdaRankLoss(torch.nn.Module):
     input: predictions and target
     output: scalar loss 
     '''
-    
+
     def __init__(self, sigma, metric):
         assert metric in ['NDCG', 'ERR']
-        
+
         super(LambdaRankLoss, self).__init__()
         self.sigma = sigma
         self.metric = metric
-        
-    
+
     def forward(self, y_hat, y):
         return LambdaRankFunction.apply(y_hat, y, self.sigma, self.metric)
 
@@ -133,8 +138,8 @@ def train(train_dl, valid_dl, config, max_epochs, early_stopping_metric, patienc
     valid_loss = defaultdict(list)
     train_ndcg = defaultdict(list)
     valid_ndcg = defaultdict(list)
-    train_err  = defaultdict(list)
-    valid_err  = defaultdict(list)
+    train_err = defaultdict(list)
+    valid_err = defaultdict(list)
 
     model = listwise_ltr.Listwise()
     model.to(device)
@@ -146,48 +151,50 @@ def train(train_dl, valid_dl, config, max_epochs, early_stopping_metric, patienc
     tqdm_str_valid = 'TRAIN: loss: {0:.3f}\t NDCG: {1:.3f}\t ERR: {2:.3f} \t VALID: loss: {3:.3f}\t NDCG: {4:.3f} \t ERR: {5:.3f}'
 
     for epoch in range(max_epochs):
-        
+
         # iterate over training set
-        if verbose: 
+        if verbose:
             pb = tqdm(total=len(train_dl))
             pb.set_description(f'Epoch: {epoch+1}/{max_epochs}')
 
         model.train()
-        for ix, (X,y) in enumerate(train_dl):
+        for ix, (X, y) in enumerate(train_dl):
             X = X.to(device).float().squeeze(0)
             y = y.to(device).float().squeeze(0)
 
             y_hat = model(X).sigmoid().squeeze(1)
-            
+
             # compute loss
             loss = critereon(y_hat, y)
 
             optimizer.zero_grad()
-            loss.backward()
+            y_hat.sum().backward(loss)
+            # print(model.nnet[2].weight)
             optimizer.step()
 
             train_loss[epoch].append(loss.item())
             ndcg_batch = ndcg(y_hat, y).item()
             err_batch = err(y_hat, y).item()
-            
+
             train_ndcg[epoch].append(ndcg_batch)
             train_err[epoch].append(err_batch)
-            
-            if ix%50 == 0 and verbose:
+
+            if ix % 50 == 0 and verbose:
                 pb.set_postfix_str(tqdm_str_train.format(
                     loss.item(), ndcg_batch, err_batch
                 ))
 
-            if verbose: pb.update()
-            
+            if verbose:
+                pb.update()
+
         mean_train_ndcg = np.mean(train_ndcg[epoch])
-        mean_train_err  = np.mean(train_err[epoch])
+        mean_train_err = np.mean(train_err[epoch])
         mean_train_loss = np.mean(train_loss[epoch])
 
         # validate
         with torch.no_grad():
             model.eval()
-            for ix, (X,y) in enumerate(valid_dl):
+            for ix, (X, y) in enumerate(valid_dl):
                 X = X.to(device).float().squeeze(0)
                 y = y.to(device).float().squeeze(0)
 
@@ -197,7 +204,7 @@ def train(train_dl, valid_dl, config, max_epochs, early_stopping_metric, patienc
                 loss = critereon(y_hat, y)
                 ndcg_batch = ndcg(y_hat, y).item()
                 err_batch = err(y_hat, y).item()
-                
+
                 valid_loss[epoch].append(loss.item())
                 valid_ndcg[epoch].append(ndcg_batch)
                 valid_err[epoch].append(err_batch)
@@ -208,22 +215,19 @@ def train(train_dl, valid_dl, config, max_epochs, early_stopping_metric, patienc
                     ))
 
         mean_valid_ndcg = np.mean(valid_ndcg[epoch])
-        mean_valid_err  = np.mean(valid_err[epoch])
+        mean_valid_err = np.mean(valid_err[epoch])
         mean_valid_loss = np.mean(valid_loss[epoch])
-        
+
         if verbose:
             pb.set_postfix_str(tqdm_str_valid.format(
                 mean_train_loss, mean_train_ndcg, mean_train_err, mean_valid_loss, mean_valid_ndcg, mean_valid_err
             ))
 
     if plot:
-        plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, valid_err, name)
-
-
+        plot_loss_ndcg(train_loss, valid_loss, train_ndcg,
+                       valid_ndcg, train_err, valid_err, name)
 
     return model, mean_valid_ndcg, mean_valid_err
-
-
 
 
 def plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, valid_err, name):
@@ -260,8 +264,10 @@ def plot_loss_ndcg(train_loss, valid_loss, train_ndcg, valid_ndcg, train_err, va
 def hyper_param_search(train_dl, valid_dl):
     #hyper param search
 
-    learning_rates = [0.001, 0.005, 0.01, 0.05]
-    sigmas = [0, 0.25, .5, 1.]
+    # learning_rates = [0.001, 0.005, 0.01, 0.05]
+    learning_rates = [0.001]
+    # sigmas = [0, 0.25, .5, 1.]
+    sigmas = [1.]
     metrics = ['NDCG']#, 'ERR']
 
     configs = [
@@ -375,8 +381,8 @@ def evaluate(model, config, dataloader, name):
 
 
 if __name__ == '__main__':
-
-    device = 'cuda:0'
+    import dataset
+    device = 'cpu'
     np.random.seed(42)
     torch.manual_seed(42)
 

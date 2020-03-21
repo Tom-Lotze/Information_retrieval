@@ -16,6 +16,8 @@ def process_json():
     for file in json_files:
         if not "TEST" in file:
             continue
+        if "ERR" in file:
+            continue
         print("\n"+file)
         with open(os.path.join(curr_path, file)) as f:
             scores_dict = json.load(f)
