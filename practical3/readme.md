@@ -16,6 +16,8 @@ All files should be called from the main directory (practical3/). For each model
 
 ### Pairwise LTR
 #### Default Ranknet (pairwise_ltr)
+- The model code is in the pairwise_ltr.py file. Running this file will train the model using the (optional) command line parameters and if needed, saves the models, results and plots. 
+- Tuning is done through the pairwise_tuning.sh script. The best model is then found by running process_jsons.py, which returns the best model by analyzing the jsons produced in the gridsearch. 
 
 
 #### Sped-up Ranknet (pairwise_ltr_sped_up)
@@ -23,8 +25,23 @@ All files should be called from the main directory (practical3/). For each model
 - Tuning is done through the sped_up_tuning.sh script. The best model is then found by running process_jsons.py, which returns the best model by analyzing the jsons produced in the gridsearch. 
 
 ### Listwise LTR (listwise_ltr)
-The model code is contained in ./listwise_ltr/listwise_ltr.py. Running the train.py file in the same folder will do (in the following order):
+- The code to train the LambdaRank model is in listwise_ltr.py. Running this file will train the model using the command line arguments.
+- Tuning the model can be done by running listwise_tuning.sh for the NDCG LambdaRank or listwise_tuning_err.sh for the ERR LambdaRank.
 
-1. Hyper-parameter optimization
-2. Training two models: the optimal configuration for nDCG and ERR, and save these to ./listwise_ltr/models. It will also produce a plot for the training progress in ./listwise_ltr/figures.
-3. These final models are then used to evaluate on the test set. The metrics are stored in a pickle in ./listwise_ltr/results.
+
+# Command line arguments:
+
+## General:
+- --learning rate - learning rate for optimizer
+- --max_epochs - maximum number of epochs to train
+- --save - boolean to save the trained model
+- --plot - boolean to save plots of NDCG (and ARR for pairwise_ltr.py) during training
+- --valid_each - frequency to evaluate on validation set (frequency in batches)
+- --early_stopping_threshold - threshold for early stopping
+- --save_pred - boolean to save predictions on test set
+
+## Listwise specific
+- --metric - to indicate which metric to use during training. 'NDCG' or 'ERR'.
+
+## Pointwise specific
+- --batch_size - batch size for training
