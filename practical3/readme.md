@@ -7,18 +7,22 @@ One can use the environment.yml file.
 
 
 ## Usage
-All files should be called from the main directory (practical3/)
+All files should be called from the main directory (practical3/). For each model there exists a seperate folder, indicated in brackets in the headings. 
 
-### Pointwise LTR
+### Pointwise LTR (pointwise_ltr)
 - The model code can be found in the pointwise_ltr.py file. Running this file will train the model given the (optional) command line arguments, save the model and results, and plot the loss and ndcg over time.
 - Tuning is done through the pointwise_tuning.sh, which will automatically train various models ad compute their results on the test set. The best configuration can be selected by running the process_jsons.py file, which will analyze all the results for the different models and return the best one. 
 - To compute the distribution of the labels and predictions, make sure one model is run with the "save_pred" flag True, this ensures a pickle will be saved with the predictions on the test set (as predictions.pt). Then, running distribution_scores.py will compute the distributions of the predictions, test set labels and validation set labels and create plots that are saved in the distribution folder. 
 
-
-
 ### Pairwise LTR
+#### Default Ranknet (pairwise_ltr)
 
-### Listwise LTR
+
+#### Sped-up Ranknet (pairwise_ltr_sped_up)
+- The model code is in the pairwise_ltr_sped_up.py file. Running this file will train the model using the (optional) command line parameters and if needed, saves the models, results and plots. 
+- Tuning is done through the sped_up_tuning.sh script. The best model is then found by running process_jsons.py, which returns the best model by analyzing the jsons produced in the gridsearch. 
+
+### Listwise LTR (listwise_ltr)
 The model code is contained in ./listwise_ltr/listwise_ltr.py. Running the train.py file in the same folder will do (in the following order):
 
 1. Hyper-parameter optimization
