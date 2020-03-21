@@ -1,4 +1,4 @@
-
+import pairwise_ltr as pair
 import torch
 import numpy as np
 import sys
@@ -7,7 +7,6 @@ from tqdm import tqdm
 sys.path.append('..')
 sys.path.append('.')
 
-import pairwise_ltr as pair
 
 if __name__ == "__main__":
     import evaluate as evl

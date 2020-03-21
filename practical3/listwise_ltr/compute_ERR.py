@@ -1,4 +1,4 @@
-import listwise_berend as listwise
+import listwise_ltr as listwise
 import torch
 import numpy as np
 import sys
@@ -20,9 +20,9 @@ if __name__ == "__main__":
 
     model = listwise.Listwise(input_dim=501, n_hidden=128)
     # model.load_state_dict(torch.load(
-        # "./listwise_berend/models/listwise_128_2_0.005.pt"))
+        # "./listwise_ltr/models/listwise_128_2_0.005.pt"))
     model.load_state_dict(torch.load(
-        "./listwise_berend/models/listwise_128_2_0.005_ERR.pt"))
+        "./listwise_ltr/models/listwise_128_2_0.005_ERR.pt"))
     # perform forward pass
     model.eval()
     scores = model.evaluate_on_test(data)[0].squeeze()

@@ -6,7 +6,7 @@ from itertools import combinations
 
 
 def process_json():
-    curr_path = os.path.join(os.getcwd(), "listwise_berend/json_files/")
+    curr_path = os.path.join(os.getcwd(), "listwise_ltr/json_files/")
 
     json_files = [file for file in os.listdir(
         curr_path) if file.endswith("ERR.json")]
