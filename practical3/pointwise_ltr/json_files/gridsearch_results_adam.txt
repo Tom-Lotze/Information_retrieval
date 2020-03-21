@@ -1,0 +1,1366 @@
+ModuleList(
+  (0): Linear(in_features=501, out_features=128, bias=True)
+  (1): Linear(in_features=128, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): Linear(in_features=128, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6187
+Batch: 100: Loss: 1.2071
+Batch: 200: Loss: 1.1437
+Batch: 300: Loss: 1.1437
+Batch: 400: Loss: 1.1052
+Batch: 500: Loss: 1.1326
+Batch: 600: Loss: 1.1202
+Batch: 700: Loss: 1.1270
+Batch: 800: Loss: 1.0827
+Batch: 900: Loss: 1.1500
+Epoch: 2
+Batch: 1000: Loss: 1.1158
+Batch: 1100: Loss: 1.1172
+Batch: 1200: Loss: 1.1536
+Batch: 1300: Loss: 1.1521
+Batch: 1400: Loss: 1.0566
+Batch: 1500: Loss: 1.1017
+Batch: 1600: Loss: 1.1077
+Batch: 1700: Loss: 1.0578
+Batch: 1800: Loss: 1.0961
+0.79654772503767 0.7989927045268469
+Epoch: 3
+Batch: 1900: Loss: 1.1009
+Batch: 2000: Loss: 1.0896
+Batch: 2100: Loss: 1.0633
+Batch: 2200: Loss: 1.0625
+Batch: 2300: Loss: 1.1513
+Batch: 2400: Loss: 1.0797
+Batch: 2500: Loss: 1.0599
+Batch: 2600: Loss: 1.1204
+Batch: 2700: Loss: 1.0706
+0.7989927045268469 0.8014830846394904
+Epoch: 4
+Batch: 2800: Loss: 1.0724
+Batch: 2900: Loss: 1.1056
+Batch: 3000: Loss: 1.0791
+Batch: 3100: Loss: 1.1389
+Batch: 3200: Loss: 1.0332
+Batch: 3300: Loss: 1.0575
+Batch: 3400: Loss: 1.0755
+Batch: 3500: Loss: 1.1361
+Batch: 3600: Loss: 1.0774
+0.8014830846394904 0.8022652877838703
+Epoch: 5
+Batch: 3700: Loss: 1.1320
+Batch: 3800: Loss: 1.0542
+Batch: 3900: Loss: 1.0134
+Batch: 4000: Loss: 1.0918
+Batch: 4100: Loss: 1.0828
+Batch: 4200: Loss: 1.0726
+Batch: 4300: Loss: 1.0786
+Batch: 4400: Loss: 1.0300
+Batch: 4500: Loss: 1.0618
+Batch: 4600: Loss: 1.0879
+0.8022652877838703 0.8031652527522162
+Epoch: 6
+Batch: 4700: Loss: 1.0299
+Batch: 4800: Loss: 1.0518
+Batch: 4900: Loss: 1.0974
+Batch: 5000: Loss: 1.0414
+Batch: 5100: Loss: 1.0403
+Batch: 5200: Loss: 1.0834
+Batch: 5300: Loss: 1.0298
+Batch: 5400: Loss: 1.0271
+ModuleList(
+  (0): Linear(in_features=501, out_features=128, bias=True)
+  (1): Linear(in_features=128, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): Linear(in_features=128, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6187
+Batch: 100: Loss: 1.2071
+Batch: 200: Loss: 1.1437
+Batch: 300: Loss: 1.1437
+Batch: 400: Loss: 1.1052
+Batch: 500: Loss: 1.1326
+Batch: 600: Loss: 1.1202
+Batch: 700: Loss: 1.1270
+Batch: 800: Loss: 1.0827
+Batch: 900: Loss: 1.1500
+Epoch: 2
+Batch: 1000: Loss: 1.1158
+Batch: 1100: Loss: 1.1172
+Batch: 1200: Loss: 1.1536
+Batch: 1300: Loss: 1.1521
+Batch: 1400: Loss: 1.0566
+Batch: 1500: Loss: 1.1017
+Batch: 1600: Loss: 1.1077
+Batch: 1700: Loss: 1.0578
+Batch: 1800: Loss: 1.0961
+0.79654772503767 0.7989927045268469
+Epoch: 3
+Batch: 1900: Loss: 1.1009
+Batch: 2000: Loss: 1.0896
+Batch: 2100: Loss: 1.0633
+Batch: 2200: Loss: 1.0625
+Batch: 2300: Loss: 1.1513
+Batch: 2400: Loss: 1.0797
+Batch: 2500: Loss: 1.0599
+Batch: 2600: Loss: 1.1204
+Batch: 2700: Loss: 1.0706
+0.7989927045268469 0.8014830846394904
+Epoch: 4
+Batch: 2800: Loss: 1.0724
+Batch: 2900: Loss: 1.1056
+Batch: 3000: Loss: 1.0791
+Batch: 3100: Loss: 1.1389
+Batch: 3200: Loss: 1.0332
+Batch: 3300: Loss: 1.0575
+Batch: 3400: Loss: 1.0755
+Batch: 3500: Loss: 1.1361
+Batch: 3600: Loss: 1.0774
+Model is saved as ./pointwise_ltr/models/pointwise_[128, 128, 128]_3_0.001_Adam.pt
+0.8014830846394904 0.8022652877838703
+Epoch: 5
+Batch: 3700: Loss: 1.1320
+Batch: 3800: Loss: 1.0542
+Batch: 3900: Loss: 1.0134
+Batch: 4000: Loss: 1.0918
+Batch: 4100: Loss: 1.0828
+Batch: 4200: Loss: 1.0726
+Batch: 4300: Loss: 1.0786
+Batch: 4400: Loss: 1.0300
+Batch: 4500: Loss: 1.0618
+Batch: 4600: Loss: 1.0879
+0.8022652877838703 0.8031652527522162
+Epoch: 6
+Batch: 4700: Loss: 1.0299
+Batch: 4800: Loss: 1.0518
+Batch: 4900: Loss: 1.0974
+Batch: 5000: Loss: 1.0414
+Batch: 5100: Loss: 1.0403
+Batch: 5200: Loss: 1.0834
+Batch: 5300: Loss: 1.0298
+Batch: 5400: Loss: 1.0271
+Batch: 5500: Loss: 1.0520
+0.8031652527522162 0.8035383442953967
+Epoch: 7
+Batch: 5600: Loss: 1.0250
+Batch: 5700: Loss: 1.0259
+Batch: 5800: Loss: 1.0735
+Batch: 5900: Loss: 1.0506
+Batch: 6000: Loss: 1.0013
+Batch: 6100: Loss: 1.0816
+Batch: 6200: Loss: 1.0446
+Batch: 6300: Loss: 1.0270
+Batch: 6400: Loss: 1.1021
+Model is saved as ./pointwise_ltr/models/pointwise_[128, 128, 128]_6_0.001_Adam.pt
+0.8035383442953967 0.8018069822653656
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=128, bias=True)
+  (1): Linear(in_features=128, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): Linear(in_features=128, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6187
+Batch: 100: Loss: 1.2029
+Batch: 200: Loss: 1.1512
+Batch: 300: Loss: 1.1512
+Batch: 400: Loss: 1.1246
+Batch: 500: Loss: 1.1327
+Batch: 600: Loss: 1.1207
+Batch: 700: Loss: 1.1211
+Batch: 800: Loss: 1.1000
+Batch: 900: Loss: 1.1640
+Epoch: 2
+Batch: 1000: Loss: 1.1535
+Batch: 1100: Loss: 1.1432
+Batch: 1200: Loss: 1.1972
+Batch: 1300: Loss: 1.1709
+Batch: 1400: Loss: 1.0633
+Batch: 1500: Loss: 1.1151
+Batch: 1600: Loss: 1.1278
+Batch: 1700: Loss: 1.0802
+Batch: 1800: Loss: 1.1204
+0.7950523354379748 0.7991012743213098
+Epoch: 3
+Batch: 1900: Loss: 1.1188
+Batch: 2000: Loss: 1.1242
+Batch: 2100: Loss: 1.0834
+Batch: 2200: Loss: 1.0788
+Batch: 2300: Loss: 1.1496
+Batch: 2400: Loss: 1.0995
+Batch: 2500: Loss: 1.0859
+Batch: 2600: Loss: 1.1414
+Batch: 2700: Loss: 1.1041
+0.7991012743213098 0.8010513368298183
+Epoch: 4
+Batch: 2800: Loss: 1.0995
+Batch: 2900: Loss: 1.1250
+Batch: 3000: Loss: 1.1036
+Batch: 3100: Loss: 1.1421
+Batch: 3200: Loss: 1.0596
+Batch: 3300: Loss: 1.0968
+Batch: 3400: Loss: 1.1106
+Batch: 3500: Loss: 1.1685
+Batch: 3600: Loss: 1.1095
+Model is saved as ./pointwise_ltr/models/pointwise_[128, 128, 128]_3_0.01_Adam.pt
+0.8010513368298183 0.801032655655765
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=128, bias=True)
+  (1): Linear(in_features=128, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): Linear(in_features=128, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6187
+Batch: 100: Loss: 1.1866
+Batch: 200: Loss: 1.1442
+Batch: 300: Loss: 1.1394
+Batch: 400: Loss: 1.1085
+Batch: 500: Loss: 1.1385
+Batch: 600: Loss: 1.0999
+Batch: 700: Loss: 1.1153
+Batch: 800: Loss: 1.0923
+Batch: 900: Loss: 1.1490
+Epoch: 2
+Batch: 1000: Loss: 1.1132
+Batch: 1100: Loss: 1.1229
+Batch: 1200: Loss: 1.1732
+Batch: 1300: Loss: 1.1572
+Batch: 1400: Loss: 1.0569
+Batch: 1500: Loss: 1.1075
+Batch: 1600: Loss: 1.1243
+Batch: 1700: Loss: 1.0621
+Batch: 1800: Loss: 1.1185
+0.7956254932328616 0.7999208376749452
+Epoch: 3
+Batch: 1900: Loss: 1.1159
+Batch: 2000: Loss: 1.1064
+Batch: 2100: Loss: 1.0581
+Batch: 2200: Loss: 1.0809
+Batch: 2300: Loss: 1.1750
+Batch: 2400: Loss: 1.0933
+Batch: 2500: Loss: 1.0727
+Batch: 2600: Loss: 1.1326
+Batch: 2700: Loss: 1.0831
+0.7999208376749452 0.8012997608296897
+Epoch: 4
+Batch: 2800: Loss: 1.0799
+Batch: 2900: Loss: 1.1174
+Batch: 3000: Loss: 1.0868
+Batch: 3100: Loss: 1.1310
+Batch: 3200: Loss: 1.0460
+Batch: 3300: Loss: 1.0731
+Batch: 3400: Loss: 1.0900
+Batch: 3500: Loss: 1.1545
+Batch: 3600: Loss: 1.0871
+Model is saved as ./pointwise_ltr/models/pointwise_[128, 128, 128]_3_0.005_Adam.pt
+0.8012997608296897 0.8021234968188957
+Epoch: 5
+Batch: 3700: Loss: 1.1398
+Batch: 3800: Loss: 1.0778
+Batch: 3900: Loss: 1.0327
+Batch: 4000: Loss: 1.1196
+Batch: 4100: Loss: 1.1136
+Batch: 4200: Loss: 1.0978
+Batch: 4300: Loss: 1.0924
+Batch: 4400: Loss: 1.0312
+Batch: 4500: Loss: 1.0764
+Batch: 4600: Loss: 1.1072
+0.8021234968188957 0.8019828219466678
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=128, bias=True)
+  (1): Linear(in_features=128, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=128, bias=True)
+  (3): Linear(in_features=128, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6187
+Batch: 100: Loss: 1.3787
+Batch: 200: Loss: 1.3508
+Batch: 300: Loss: 1.3680
+Batch: 400: Loss: 1.3463
+Batch: 500: Loss: 1.3561
+Batch: 600: Loss: 1.3346
+Batch: 700: Loss: 1.3755
+Batch: 800: Loss: 1.3354
+Batch: 900: Loss: 1.3572
+Epoch: 2
+Batch: 1000: Loss: 1.3171
+Batch: 1100: Loss: 1.3832
+Batch: 1200: Loss: 1.3724
+Batch: 1300: Loss: 1.3474
+Batch: 1400: Loss: 1.3420
+Batch: 1500: Loss: 1.3234
+Batch: 1600: Loss: 1.3523
+Batch: 1700: Loss: 1.3356
+Batch: 1800: Loss: 1.3622
+0.7609581384428697 0.7603010478768373
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=8, bias=True)
+  (3): Linear(in_features=8, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6277
+Batch: 100: Loss: 1.1985
+Batch: 200: Loss: 1.1724
+Batch: 300: Loss: 1.1319
+Batch: 400: Loss: 1.1555
+Batch: 500: Loss: 1.1445
+Batch: 600: Loss: 1.1111
+Batch: 700: Loss: 1.0981
+Batch: 800: Loss: 1.1402
+Batch: 900: Loss: 1.1069
+Epoch: 2
+Batch: 1000: Loss: 1.1228
+Batch: 1100: Loss: 1.1611
+Batch: 1200: Loss: 1.1827
+Batch: 1300: Loss: 1.0980
+Batch: 1400: Loss: 1.1200
+Batch: 1500: Loss: 1.0975
+Batch: 1600: Loss: 1.1100
+Batch: 1700: Loss: 1.1206
+Batch: 1800: Loss: 1.1326
+0.794481015138413 0.8008020147472823
+Epoch: 3
+Batch: 1900: Loss: 1.0914
+Batch: 2000: Loss: 1.0987
+Batch: 2100: Loss: 1.1182
+Batch: 2200: Loss: 1.1043
+Batch: 2300: Loss: 1.0825
+Batch: 2400: Loss: 1.1246
+Batch: 2500: Loss: 1.1050
+Batch: 2600: Loss: 1.0765
+Batch: 2700: Loss: 1.0543
+0.8008020147472823 0.8022191697209652
+Epoch: 4
+Batch: 2800: Loss: 1.0713
+Batch: 2900: Loss: 1.0700
+Batch: 3000: Loss: 1.1230
+Batch: 3100: Loss: 1.1795
+Batch: 3200: Loss: 1.0757
+Batch: 3300: Loss: 1.0963
+Batch: 3400: Loss: 1.0543
+Batch: 3500: Loss: 1.1039
+Batch: 3600: Loss: 1.0488
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 128, 8]_3_0.001_Adam.pt
+0.8022191697209652 0.8027983871716402
+Epoch: 5
+Batch: 3700: Loss: 1.0654
+Batch: 3800: Loss: 1.0563
+Batch: 3900: Loss: 1.1010
+Batch: 4000: Loss: 1.0559
+Batch: 4100: Loss: 1.0927
+Batch: 4200: Loss: 1.0759
+Batch: 4300: Loss: 1.0322
+Batch: 4400: Loss: 1.0733
+Batch: 4500: Loss: 1.0601
+Batch: 4600: Loss: 1.0887
+0.8027983871716402 0.8032596064001805
+Epoch: 6
+Batch: 4700: Loss: 1.0135
+Batch: 4800: Loss: 1.0750
+Batch: 4900: Loss: 1.0764
+Batch: 5000: Loss: 1.0439
+Batch: 5100: Loss: 1.0610
+Batch: 5200: Loss: 1.0598
+Batch: 5300: Loss: 1.0764
+Batch: 5400: Loss: 1.0539
+Batch: 5500: Loss: 1.0827
+0.8032596064001805 0.8030564147976219
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=8, bias=True)
+  (3): Linear(in_features=8, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6277
+Batch: 100: Loss: 1.2907
+Batch: 200: Loss: 1.2160
+Batch: 300: Loss: 1.1905
+Batch: 400: Loss: 1.1738
+Batch: 500: Loss: 1.1763
+Batch: 600: Loss: 1.1535
+Batch: 700: Loss: 1.1067
+Batch: 800: Loss: 1.1856
+Batch: 900: Loss: 1.1395
+Epoch: 2
+Batch: 1000: Loss: 1.1635
+Batch: 1100: Loss: 1.1958
+Batch: 1200: Loss: 1.2231
+Batch: 1300: Loss: 1.1521
+Batch: 1400: Loss: 1.1722
+Batch: 1500: Loss: 1.1543
+Batch: 1600: Loss: 1.1457
+Batch: 1700: Loss: 1.1823
+Batch: 1800: Loss: 1.1864
+0.7903526856358808 0.7987964893114919
+Epoch: 3
+Batch: 1900: Loss: 1.1513
+Batch: 2000: Loss: 1.1539
+Batch: 2100: Loss: 1.1730
+Batch: 2200: Loss: 1.1586
+Batch: 2300: Loss: 1.1208
+Batch: 2400: Loss: 1.1681
+Batch: 2500: Loss: 1.1895
+Batch: 2600: Loss: 1.1010
+Batch: 2700: Loss: 1.1147
+0.7987964893114919 0.8010157571233961
+Epoch: 4
+Batch: 2800: Loss: 1.1091
+Batch: 2900: Loss: 1.1353
+Batch: 3000: Loss: 1.1640
+Batch: 3100: Loss: 1.2467
+Batch: 3200: Loss: 1.1350
+Batch: 3300: Loss: 1.1547
+Batch: 3400: Loss: 1.1207
+Batch: 3500: Loss: 1.1829
+Batch: 3600: Loss: 1.1158
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 128, 8]_3_0.01_Adam.pt
+0.8010157571233961 0.8000615195583891
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=8, bias=True)
+  (3): Linear(in_features=8, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6277
+Batch: 100: Loss: 1.2864
+Batch: 200: Loss: 1.2390
+Batch: 300: Loss: 1.2014
+Batch: 400: Loss: 1.1709
+Batch: 500: Loss: 1.1735
+Batch: 600: Loss: 1.1381
+Batch: 700: Loss: 1.1128
+Batch: 800: Loss: 1.1865
+Batch: 900: Loss: 1.1289
+Epoch: 2
+Batch: 1000: Loss: 1.1584
+Batch: 1100: Loss: 1.1962
+Batch: 1200: Loss: 1.2335
+Batch: 1300: Loss: 1.1570
+Batch: 1400: Loss: 1.1683
+Batch: 1500: Loss: 1.1351
+Batch: 1600: Loss: 1.1517
+Batch: 1700: Loss: 1.1785
+Batch: 1800: Loss: 1.1939
+0.7882853701224583 0.7995480496646192
+Epoch: 3
+Batch: 1900: Loss: 1.1283
+Batch: 2000: Loss: 1.1537
+Batch: 2100: Loss: 1.1711
+Batch: 2200: Loss: 1.1661
+Batch: 2300: Loss: 1.1291
+Batch: 2400: Loss: 1.1705
+Batch: 2500: Loss: 1.1705
+Batch: 2600: Loss: 1.1040
+Batch: 2700: Loss: 1.1178
+0.7995480496646192 0.8019362112422176
+Epoch: 4
+Batch: 2800: Loss: 1.1012
+Batch: 2900: Loss: 1.1352
+Batch: 3000: Loss: 1.1461
+Batch: 3100: Loss: 1.2378
+Batch: 3200: Loss: 1.1363
+Batch: 3300: Loss: 1.1514
+Batch: 3400: Loss: 1.1218
+Batch: 3500: Loss: 1.1815
+Batch: 3600: Loss: 1.1190
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 128, 8]_3_0.005_Adam.pt
+0.8019362112422176 0.8012125717621338
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=128, bias=True)
+  (2): Linear(in_features=128, out_features=8, bias=True)
+  (3): Linear(in_features=8, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6277
+Batch: 100: Loss: 1.3316
+Batch: 200: Loss: 1.3277
+Batch: 300: Loss: 1.3046
+Batch: 400: Loss: 1.3780
+Batch: 500: Loss: 1.3695
+Batch: 600: Loss: 1.3663
+Batch: 700: Loss: 1.3419
+Batch: 800: Loss: 1.3459
+Batch: 900: Loss: 1.3412
+Epoch: 2
+Batch: 1000: Loss: 1.3342
+Batch: 1100: Loss: 1.3821
+Batch: 1200: Loss: 1.3732
+Batch: 1300: Loss: 1.3553
+Batch: 1400: Loss: 1.3715
+Batch: 1500: Loss: 1.3674
+Batch: 1600: Loss: 1.3492
+Batch: 1700: Loss: 1.3523
+Batch: 1800: Loss: 1.3575
+0.7609581384428697 0.7603010478768373
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=10, bias=True)
+  (2): Linear(in_features=10, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6590
+Batch: 100: Loss: 1.1185
+Batch: 200: Loss: 1.1388
+Batch: 300: Loss: 1.1072
+Batch: 400: Loss: 1.1679
+Batch: 500: Loss: 1.1336
+Batch: 600: Loss: 1.0758
+Batch: 700: Loss: 1.1417
+Batch: 800: Loss: 1.1292
+Batch: 900: Loss: 1.1207
+Epoch: 2
+Batch: 1000: Loss: 1.1303
+Batch: 1100: Loss: 1.0630
+Batch: 1200: Loss: 1.0927
+Batch: 1300: Loss: 1.1125
+Batch: 1400: Loss: 1.1022
+Batch: 1500: Loss: 1.1425
+Batch: 1600: Loss: 1.0946
+Batch: 1700: Loss: 1.0470
+Batch: 1800: Loss: 1.0677
+0.7946115356043929 0.7991511154655311
+Epoch: 3
+Batch: 1900: Loss: 1.0778
+Batch: 2000: Loss: 1.0742
+Batch: 2100: Loss: 1.0860
+Batch: 2200: Loss: 1.1301
+Batch: 2300: Loss: 1.1485
+Batch: 2400: Loss: 1.0864
+Batch: 2500: Loss: 1.0680
+Batch: 2600: Loss: 1.0762
+Batch: 2700: Loss: 1.0063
+0.7991511154655311 0.8014484987325184
+Epoch: 4
+Batch: 2800: Loss: 1.1321
+Batch: 2900: Loss: 1.1012
+Batch: 3000: Loss: 1.1114
+Batch: 3100: Loss: 1.1041
+Batch: 3200: Loss: 1.1187
+Batch: 3300: Loss: 1.1566
+Batch: 3400: Loss: 1.0599
+Batch: 3500: Loss: 1.1288
+Batch: 3600: Loss: 1.1394
+Model is saved as ./pointwise_ltr/models/pointwise_[256, 10]_3_0.001_Adam.pt
+0.8014484987325184 0.8021710611307573
+Epoch: 5
+Batch: 3700: Loss: 1.0865
+Batch: 3800: Loss: 1.0466
+Batch: 3900: Loss: 1.0460
+Batch: 4000: Loss: 1.1177
+Batch: 4100: Loss: 1.0818
+Batch: 4200: Loss: 1.0809
+Batch: 4300: Loss: 1.0738
+Batch: 4400: Loss: 1.0683
+Batch: 4500: Loss: 1.0570
+Batch: 4600: Loss: 1.0589
+0.8021710611307573 0.8024754056527922
+Epoch: 6
+Batch: 4700: Loss: 1.0573
+Batch: 4800: Loss: 1.0689
+Batch: 4900: Loss: 1.0889
+Batch: 5000: Loss: 1.1028
+Batch: 5100: Loss: 1.0724
+Batch: 5200: Loss: 1.0631
+Batch: 5300: Loss: 1.0546
+Batch: 5400: Loss: 1.0249
+Batch: 5500: Loss: 1.0771
+0.8024754056527922 0.8041613648863816
+Epoch: 7
+Batch: 5600: Loss: 1.0523
+Batch: 5700: Loss: 1.0472
+Batch: 5800: Loss: 1.0763
+Batch: 5900: Loss: 1.0493
+Batch: 6000: Loss: 1.0361
+Batch: 6100: Loss: 1.0579
+Batch: 6200: Loss: 1.0380
+Batch: 6300: Loss: 1.0612
+Batch: 6400: Loss: 1.0574
+Model is saved as ./pointwise_ltr/models/pointwise_[256, 10]_6_0.001_Adam.pt
+0.8041613648863816 0.8038455467063903
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=10, bias=True)
+  (2): Linear(in_features=10, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6590
+Batch: 100: Loss: 1.1370
+Batch: 200: Loss: 1.1457
+Batch: 300: Loss: 1.1069
+Batch: 400: Loss: 1.1506
+Batch: 500: Loss: 1.1431
+Batch: 600: Loss: 1.0726
+Batch: 700: Loss: 1.1331
+Batch: 800: Loss: 1.1256
+Batch: 900: Loss: 1.1274
+Epoch: 2
+Batch: 1000: Loss: 1.1303
+Batch: 1100: Loss: 1.0591
+Batch: 1200: Loss: 1.1089
+Batch: 1300: Loss: 1.1017
+Batch: 1400: Loss: 1.1076
+Batch: 1500: Loss: 1.1399
+Batch: 1600: Loss: 1.0941
+Batch: 1700: Loss: 1.0524
+Batch: 1800: Loss: 1.0926
+0.795087727598252 0.7984956455991381
+Epoch: 3
+Batch: 1900: Loss: 1.0934
+Batch: 2000: Loss: 1.0934
+Batch: 2100: Loss: 1.0886
+Batch: 2200: Loss: 1.1334
+Batch: 2300: Loss: 1.1520
+Batch: 2400: Loss: 1.0908
+Batch: 2500: Loss: 1.0944
+Batch: 2600: Loss: 1.1031
+Batch: 2700: Loss: 1.0205
+0.7984956455991381 0.8004893185259552
+Epoch: 4
+Batch: 2800: Loss: 1.1407
+Batch: 2900: Loss: 1.1020
+Batch: 3000: Loss: 1.1369
+Batch: 3100: Loss: 1.1197
+Batch: 3200: Loss: 1.1499
+Batch: 3300: Loss: 1.1773
+Batch: 3400: Loss: 1.0840
+Batch: 3500: Loss: 1.1193
+Batch: 3600: Loss: 1.1558
+Model is saved as ./pointwise_ltr/models/pointwise_[256, 10]_3_0.01_Adam.pt
+0.8004893185259552 0.7997910539951806
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=10, bias=True)
+  (2): Linear(in_features=10, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6590
+Batch: 100: Loss: 1.1435
+Batch: 200: Loss: 1.1555
+Batch: 300: Loss: 1.1042
+Batch: 400: Loss: 1.1547
+Batch: 500: Loss: 1.1394
+Batch: 600: Loss: 1.0739
+Batch: 700: Loss: 1.1314
+Batch: 800: Loss: 1.1249
+Batch: 900: Loss: 1.1235
+Epoch: 2
+Batch: 1000: Loss: 1.1305
+Batch: 1100: Loss: 1.0389
+Batch: 1200: Loss: 1.0927
+Batch: 1300: Loss: 1.1094
+Batch: 1400: Loss: 1.1016
+Batch: 1500: Loss: 1.1423
+Batch: 1600: Loss: 1.1048
+Batch: 1700: Loss: 1.0602
+Batch: 1800: Loss: 1.0671
+0.7948422100327285 0.8000023133028525
+Epoch: 3
+Batch: 1900: Loss: 1.0837
+Batch: 2000: Loss: 1.0860
+Batch: 2100: Loss: 1.0873
+Batch: 2200: Loss: 1.1306
+Batch: 2300: Loss: 1.1566
+Batch: 2400: Loss: 1.0859
+Batch: 2500: Loss: 1.0839
+Batch: 2600: Loss: 1.0915
+Batch: 2700: Loss: 1.0202
+0.8000023133028525 0.8025588981829558
+Epoch: 4
+Batch: 2800: Loss: 1.1271
+Batch: 2900: Loss: 1.1112
+Batch: 3000: Loss: 1.1186
+Batch: 3100: Loss: 1.1090
+Batch: 3200: Loss: 1.1162
+Batch: 3300: Loss: 1.1672
+Batch: 3400: Loss: 1.0647
+Batch: 3500: Loss: 1.1420
+Batch: 3600: Loss: 1.1369
+Model is saved as ./pointwise_ltr/models/pointwise_[256, 10]_3_0.005_Adam.pt
+0.8025588981829558 0.8025477109106063
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=10, bias=True)
+  (2): Linear(in_features=10, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.6590
+Batch: 100: Loss: 1.1767
+Batch: 200: Loss: 1.1638
+Batch: 300: Loss: 1.1390
+Batch: 400: Loss: 1.1857
+Batch: 500: Loss: 1.1559
+Batch: 600: Loss: 1.1023
+Batch: 700: Loss: 1.1533
+Batch: 800: Loss: 1.1615
+Batch: 900: Loss: 1.1599
+Epoch: 2
+Batch: 1000: Loss: 1.1495
+Batch: 1100: Loss: 1.1156
+Batch: 1200: Loss: 1.1465
+Batch: 1300: Loss: 1.1689
+Batch: 1400: Loss: 1.1326
+Batch: 1500: Loss: 1.2046
+Batch: 1600: Loss: 1.1501
+Batch: 1700: Loss: 1.0900
+Batch: 1800: Loss: 1.1528
+0.7926282941725454 0.7943528486319973
+Epoch: 3
+Batch: 1900: Loss: 1.1121
+Batch: 2000: Loss: 1.1210
+Batch: 2100: Loss: 1.1315
+Batch: 2200: Loss: 1.1796
+Batch: 2300: Loss: 1.1875
+Batch: 2400: Loss: 1.1176
+Batch: 2500: Loss: 1.1226
+Batch: 2600: Loss: 1.1547
+Batch: 2700: Loss: 1.0718
+0.7943528486319973 0.7962031286909744
+Epoch: 4
+Batch: 2800: Loss: 1.1870
+Batch: 2900: Loss: 1.1649
+Batch: 3000: Loss: 1.1624
+Batch: 3100: Loss: 1.1351
+Batch: 3200: Loss: 1.1789
+Batch: 3300: Loss: 1.2499
+Batch: 3400: Loss: 1.1461
+Batch: 3500: Loss: 1.1833
+Batch: 3600: Loss: 1.1828
+Model is saved as ./pointwise_ltr/models/pointwise_[256, 10]_3_0.05_Adam.pt
+0.7962031286909744 0.7956544616066451
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5490
+Batch: 100: Loss: 1.1354
+Batch: 200: Loss: 1.1757
+Batch: 300: Loss: 1.1086
+Batch: 400: Loss: 1.1762
+Batch: 500: Loss: 1.1641
+Batch: 600: Loss: 1.0912
+Batch: 700: Loss: 1.1225
+Batch: 800: Loss: 1.1276
+Batch: 900: Loss: 1.1058
+Epoch: 2
+Batch: 1000: Loss: 1.1297
+Batch: 1100: Loss: 1.1049
+Batch: 1200: Loss: 1.0556
+Batch: 1300: Loss: 1.0947
+Batch: 1400: Loss: 1.1407
+Batch: 1500: Loss: 1.0678
+Batch: 1600: Loss: 1.0688
+Batch: 1700: Loss: 1.0297
+Batch: 1800: Loss: 1.0972
+0.7936882330606541 0.7991624823102386
+Epoch: 3
+Batch: 1900: Loss: 1.0654
+Batch: 2000: Loss: 1.0940
+Batch: 2100: Loss: 1.0469
+Batch: 2200: Loss: 1.0802
+Batch: 2300: Loss: 1.1501
+Batch: 2400: Loss: 1.0955
+Batch: 2500: Loss: 1.0392
+Batch: 2600: Loss: 1.0301
+Batch: 2700: Loss: 1.0671
+0.7991624823102386 0.8010185703461821
+Epoch: 4
+Batch: 2800: Loss: 1.0319
+Batch: 2900: Loss: 1.0936
+Batch: 3000: Loss: 1.0865
+Batch: 3100: Loss: 1.0737
+Batch: 3200: Loss: 1.0778
+Batch: 3300: Loss: 1.0770
+Batch: 3400: Loss: 1.0911
+Batch: 3500: Loss: 1.0605
+Batch: 3600: Loss: 1.0467
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_3_0.001_Adam.pt
+0.8010185703461821 0.8007129621725128
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5490
+Batch: 100: Loss: 1.1284
+Batch: 200: Loss: 1.1856
+Batch: 300: Loss: 1.1084
+Batch: 400: Loss: 1.1681
+Batch: 500: Loss: 1.1623
+Batch: 600: Loss: 1.1149
+Batch: 700: Loss: 1.1509
+Batch: 800: Loss: 1.1381
+Batch: 900: Loss: 1.1125
+Epoch: 2
+Batch: 1000: Loss: 1.1589
+Batch: 1100: Loss: 1.1387
+Batch: 1200: Loss: 1.0636
+Batch: 1300: Loss: 1.1145
+Batch: 1400: Loss: 1.1404
+Batch: 1500: Loss: 1.0835
+Batch: 1600: Loss: 1.0875
+Batch: 1700: Loss: 1.0831
+Batch: 1800: Loss: 1.1249
+0.7955767366898161 0.7972841756510377
+Epoch: 3
+Batch: 1900: Loss: 1.0762
+Batch: 2000: Loss: 1.1226
+Batch: 2100: Loss: 1.0527
+Batch: 2200: Loss: 1.0966
+Batch: 2300: Loss: 1.1650
+Batch: 2400: Loss: 1.1071
+Batch: 2500: Loss: 1.0659
+Batch: 2600: Loss: 1.0609
+Batch: 2700: Loss: 1.0855
+0.7972841756510377 0.7994735301421494
+Epoch: 4
+Batch: 2800: Loss: 1.0616
+Batch: 2900: Loss: 1.1074
+Batch: 3000: Loss: 1.1072
+Batch: 3100: Loss: 1.0948
+Batch: 3200: Loss: 1.1145
+Batch: 3300: Loss: 1.1072
+Batch: 3400: Loss: 1.1145
+Batch: 3500: Loss: 1.0801
+Batch: 3600: Loss: 1.0880
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_3_0.01_Adam.pt
+0.7994735301421494 0.8001534278156324
+Epoch: 5
+Batch: 3700: Loss: 1.0880
+Batch: 3800: Loss: 1.0473
+Batch: 3900: Loss: 1.0891
+Batch: 4000: Loss: 1.1036
+Batch: 4100: Loss: 1.1239
+Batch: 4200: Loss: 1.1118
+Batch: 4300: Loss: 1.1059
+Batch: 4400: Loss: 1.1929
+Batch: 4500: Loss: 1.1351
+Batch: 4600: Loss: 1.1062
+0.8001534278156324 0.8005910413600195
+Epoch: 6
+Batch: 4700: Loss: 1.1523
+Batch: 4800: Loss: 1.0843
+Batch: 4900: Loss: 1.0487
+Batch: 5000: Loss: 1.0623
+Batch: 5100: Loss: 1.0864
+Batch: 5200: Loss: 1.0662
+Batch: 5300: Loss: 1.0888
+Batch: 5400: Loss: 1.0960
+Batch: 5500: Loss: 1.1000
+0.8005910413600195 0.8018368814696901
+Epoch: 7
+Batch: 5600: Loss: 1.0437
+Batch: 5700: Loss: 1.0796
+Batch: 5800: Loss: 1.0933
+Batch: 5900: Loss: 1.0833
+Batch: 6000: Loss: 1.0811
+Batch: 6100: Loss: 1.0794
+Batch: 6200: Loss: 1.1294
+Batch: 6300: Loss: 1.0858
+Batch: 6400: Loss: 1.0623
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_6_0.01_Adam.pt
+0.8018368814696901 0.8018461684877332
+Epoch: 8
+Batch: 6500: Loss: 1.0760
+Batch: 6600: Loss: 1.1195
+Batch: 6700: Loss: 1.1029
+Batch: 6800: Loss: 1.1312
+Batch: 6900: Loss: 1.1441
+Batch: 7000: Loss: 1.0774
+Batch: 7100: Loss: 1.1196
+Batch: 7200: Loss: 1.0894
+Batch: 7300: Loss: 1.1312
+0.8018461684877332 0.8024849764720663
+Epoch: 9
+Batch: 7400: Loss: 1.0697
+Batch: 7500: Loss: 1.0999
+Batch: 7600: Loss: 1.0907
+Batch: 7700: Loss: 1.0880
+Batch: 7800: Loss: 1.1071
+Batch: 7900: Loss: 1.0956
+Batch: 8000: Loss: 1.1232
+Batch: 8100: Loss: 1.1149
+Batch: 8200: Loss: 1.0498
+Batch: 8300: Loss: 1.0951
+0.8024849764720663 0.8039670609125483
+Epoch: 10
+Batch: 8400: Loss: 1.1000
+Batch: 8500: Loss: 1.0961
+Batch: 8600: Loss: 1.1237
+Batch: 8700: Loss: 1.1176
+Batch: 8800: Loss: 1.0729
+Batch: 8900: Loss: 1.0698
+Batch: 9000: Loss: 1.1181
+Batch: 9100: Loss: 1.0682
+Batch: 9200: Loss: 1.1088
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_9_0.01_Adam.pt
+0.8039670609125483 0.8026223716784844
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5490
+Batch: 100: Loss: 1.1300
+Batch: 200: Loss: 1.1850
+Batch: 300: Loss: 1.1031
+Batch: 400: Loss: 1.1684
+Batch: 500: Loss: 1.1572
+Batch: 600: Loss: 1.1120
+Batch: 700: Loss: 1.1537
+Batch: 800: Loss: 1.1308
+Batch: 900: Loss: 1.1007
+Epoch: 2
+Batch: 1000: Loss: 1.1319
+Batch: 1100: Loss: 1.1175
+Batch: 1200: Loss: 1.0698
+Batch: 1300: Loss: 1.1156
+Batch: 1400: Loss: 1.1487
+Batch: 1500: Loss: 1.0801
+Batch: 1600: Loss: 1.0793
+Batch: 1700: Loss: 1.0590
+Batch: 1800: Loss: 1.1161
+0.7952897342795889 0.7978270364948896
+Epoch: 3
+Batch: 1900: Loss: 1.0653
+Batch: 2000: Loss: 1.1085
+Batch: 2100: Loss: 1.0423
+Batch: 2200: Loss: 1.0743
+Batch: 2300: Loss: 1.1456
+Batch: 2400: Loss: 1.1022
+Batch: 2500: Loss: 1.0516
+Batch: 2600: Loss: 1.0396
+Batch: 2700: Loss: 1.0856
+0.7978270364948896 0.8008442528258954
+Epoch: 4
+Batch: 2800: Loss: 1.0611
+Batch: 2900: Loss: 1.1015
+Batch: 3000: Loss: 1.0938
+Batch: 3100: Loss: 1.0859
+Batch: 3200: Loss: 1.0932
+Batch: 3300: Loss: 1.0864
+Batch: 3400: Loss: 1.1009
+Batch: 3500: Loss: 1.0676
+Batch: 3600: Loss: 1.0691
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_3_0.005_Adam.pt
+0.8008442528258954 0.8020293436410201
+Epoch: 5
+Batch: 3700: Loss: 1.0953
+Batch: 3800: Loss: 1.0253
+Batch: 3900: Loss: 1.0862
+Batch: 4000: Loss: 1.1048
+Batch: 4100: Loss: 1.1060
+Batch: 4200: Loss: 1.1089
+Batch: 4300: Loss: 1.0757
+Batch: 4400: Loss: 1.1887
+Batch: 4500: Loss: 1.1011
+Batch: 4600: Loss: 1.0855
+0.8020293436410201 0.8022371798905124
+Epoch: 6
+Batch: 4700: Loss: 1.1341
+Batch: 4800: Loss: 1.0579
+Batch: 4900: Loss: 1.0469
+Batch: 5000: Loss: 1.0263
+Batch: 5100: Loss: 1.0677
+Batch: 5200: Loss: 1.0605
+Batch: 5300: Loss: 1.0686
+Batch: 5400: Loss: 1.0982
+Batch: 5500: Loss: 1.0635
+0.8022371798905124 0.8021333933058222
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=256, bias=True)
+  (1): Linear(in_features=256, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5490
+Batch: 100: Loss: 1.1551
+Batch: 200: Loss: 1.2202
+Batch: 300: Loss: 1.1670
+Batch: 400: Loss: 1.2262
+Batch: 500: Loss: 1.2245
+Batch: 600: Loss: 1.1525
+Batch: 700: Loss: 1.1914
+Batch: 800: Loss: 1.2048
+Batch: 900: Loss: 1.1586
+Epoch: 2
+Batch: 1000: Loss: 1.1697
+Batch: 1100: Loss: 1.1768
+Batch: 1200: Loss: 1.1559
+Batch: 1300: Loss: 1.1666
+Batch: 1400: Loss: 1.1806
+Batch: 1500: Loss: 1.1402
+Batch: 1600: Loss: 1.1969
+Batch: 1700: Loss: 1.0961
+Batch: 1800: Loss: 1.1875
+0.7903032089257358 0.7914026169053221
+Epoch: 3
+Batch: 1900: Loss: 1.1206
+Batch: 2000: Loss: 1.1636
+Batch: 2100: Loss: 1.1183
+Batch: 2200: Loss: 1.1203
+Batch: 2300: Loss: 1.2028
+Batch: 2400: Loss: 1.1191
+Batch: 2500: Loss: 1.0842
+Batch: 2600: Loss: 1.0947
+Batch: 2700: Loss: 1.1386
+0.7914026169053221 0.7939341130765598
+Epoch: 4
+Batch: 2800: Loss: 1.1259
+Batch: 2900: Loss: 1.1749
+Batch: 3000: Loss: 1.1399
+Batch: 3100: Loss: 1.1275
+Batch: 3200: Loss: 1.1501
+Batch: 3300: Loss: 1.1831
+Batch: 3400: Loss: 1.1479
+Batch: 3500: Loss: 1.1407
+Batch: 3600: Loss: 1.1200
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_3_0.05_Adam.pt
+0.7939341130765598 0.7948416831741949
+Epoch: 5
+Batch: 3700: Loss: 1.1277
+Batch: 3800: Loss: 1.0794
+Batch: 3900: Loss: 1.1184
+Batch: 4000: Loss: 1.1459
+Batch: 4100: Loss: 1.1394
+Batch: 4200: Loss: 1.1787
+Batch: 4300: Loss: 1.1448
+Batch: 4400: Loss: 1.2216
+Batch: 4500: Loss: 1.1736
+Batch: 4600: Loss: 1.1264
+0.7948416831741949 0.7957802939529962
+Epoch: 6
+Batch: 4700: Loss: 1.2141
+Batch: 4800: Loss: 1.1424
+Batch: 4900: Loss: 1.0907
+Batch: 5000: Loss: 1.1079
+Batch: 5100: Loss: 1.1580
+Batch: 5200: Loss: 1.1245
+Batch: 5300: Loss: 1.1294
+Batch: 5400: Loss: 1.1551
+Batch: 5500: Loss: 1.1362
+0.7957802939529962 0.797112946042516
+Epoch: 7
+Batch: 5600: Loss: 1.1250
+Batch: 5700: Loss: 1.1514
+Batch: 5800: Loss: 1.1587
+Batch: 5900: Loss: 1.1237
+Batch: 6000: Loss: 1.1142
+Batch: 6100: Loss: 1.1424
+Batch: 6200: Loss: 1.1968
+Batch: 6300: Loss: 1.1156
+Batch: 6400: Loss: 1.1483
+Model is saved as ./pointwise_ltr/models/pointwise_[256]_6_0.05_Adam.pt
+0.797112946042516 0.7938196728793151
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=512, bias=True)
+  (2): Linear(in_features=512, out_features=512, bias=True)
+  (3): Linear(in_features=512, out_features=512, bias=True)
+  (4): Linear(in_features=512, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5949
+Batch: 100: Loss: 1.1733
+Batch: 200: Loss: 1.1135
+Batch: 300: Loss: 1.0960
+Batch: 400: Loss: 1.1494
+Batch: 500: Loss: 1.1612
+Batch: 600: Loss: 1.1144
+Batch: 700: Loss: 1.1222
+Batch: 800: Loss: 1.1192
+Batch: 900: Loss: 1.0943
+Epoch: 2
+Batch: 1000: Loss: 1.0724
+Batch: 1100: Loss: 1.1703
+Batch: 1200: Loss: 1.1081
+Batch: 1300: Loss: 1.1052
+Batch: 1400: Loss: 1.1328
+Batch: 1500: Loss: 1.1377
+Batch: 1600: Loss: 1.1456
+Batch: 1700: Loss: 1.1052
+Batch: 1800: Loss: 1.1206
+0.795952109412831 0.8014034304594545
+Epoch: 3
+Batch: 1900: Loss: 1.0343
+Batch: 2000: Loss: 1.0663
+Batch: 2100: Loss: 1.1016
+Batch: 2200: Loss: 1.0858
+Batch: 2300: Loss: 1.1154
+Batch: 2400: Loss: 1.1083
+Batch: 2500: Loss: 1.0696
+Batch: 2600: Loss: 1.0974
+Batch: 2700: Loss: 1.0791
+0.8014034304594545 0.8038529662706813
+Epoch: 4
+Batch: 2800: Loss: 1.0891
+Batch: 2900: Loss: 1.0944
+Batch: 3000: Loss: 1.1172
+Batch: 3100: Loss: 1.0716
+Batch: 3200: Loss: 1.1371
+Batch: 3300: Loss: 1.0553
+Batch: 3400: Loss: 1.0712
+Batch: 3500: Loss: 1.0572
+Batch: 3600: Loss: 1.0144
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 512, 512, 512]_3_0.001_Adam.pt
+0.8038529662706813 0.8019354561466305
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=512, bias=True)
+  (2): Linear(in_features=512, out_features=512, bias=True)
+  (3): Linear(in_features=512, out_features=512, bias=True)
+  (4): Linear(in_features=512, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5949
+Batch: 100: Loss: 1.2002
+Batch: 200: Loss: 1.1516
+Batch: 300: Loss: 1.1094
+Batch: 400: Loss: 1.1591
+Batch: 500: Loss: 1.1771
+Batch: 600: Loss: 1.1331
+Batch: 700: Loss: 1.1573
+Batch: 800: Loss: 1.1274
+Batch: 900: Loss: 1.1347
+Epoch: 2
+Batch: 1000: Loss: 1.1430
+Batch: 1100: Loss: 1.1881
+Batch: 1200: Loss: 1.1361
+Batch: 1300: Loss: 1.1569
+Batch: 1400: Loss: 1.1613
+Batch: 1500: Loss: 1.1851
+Batch: 1600: Loss: 1.1725
+Batch: 1700: Loss: 1.1261
+Batch: 1800: Loss: 1.1506
+0.7943726885790714 0.7981629310194241
+Epoch: 3
+Batch: 1900: Loss: 1.0739
+Batch: 2000: Loss: 1.1147
+Batch: 2100: Loss: 1.1589
+Batch: 2200: Loss: 1.1534
+Batch: 2300: Loss: 1.1717
+Batch: 2400: Loss: 1.1270
+Batch: 2500: Loss: 1.1133
+Batch: 2600: Loss: 1.1508
+Batch: 2700: Loss: 1.1007
+0.7981629310194241 0.7989317585018085
+Epoch: 4
+Batch: 2800: Loss: 1.1552
+Batch: 2900: Loss: 1.1296
+Batch: 3000: Loss: 1.1688
+Batch: 3100: Loss: 1.1255
+Batch: 3200: Loss: 1.1851
+Batch: 3300: Loss: 1.1085
+Batch: 3400: Loss: 1.1574
+Batch: 3500: Loss: 1.1193
+Batch: 3600: Loss: 1.0706
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 512, 512, 512]_3_0.01_Adam.pt
+0.7989317585018085 0.7978196828560575
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=512, bias=True)
+  (2): Linear(in_features=512, out_features=512, bias=True)
+  (3): Linear(in_features=512, out_features=512, bias=True)
+  (4): Linear(in_features=512, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5949
+Batch: 100: Loss: 1.1844
+Batch: 200: Loss: 1.1258
+Batch: 300: Loss: 1.0978
+Batch: 400: Loss: 1.1527
+Batch: 500: Loss: 1.1719
+Batch: 600: Loss: 1.1184
+Batch: 700: Loss: 1.1389
+Batch: 800: Loss: 1.1429
+Batch: 900: Loss: 1.1088
+Epoch: 2
+Batch: 1000: Loss: 1.1175
+Batch: 1100: Loss: 1.1917
+Batch: 1200: Loss: 1.1308
+Batch: 1300: Loss: 1.1337
+Batch: 1400: Loss: 1.1469
+Batch: 1500: Loss: 1.1691
+Batch: 1600: Loss: 1.1537
+Batch: 1700: Loss: 1.1043
+Batch: 1800: Loss: 1.1444
+0.7951010438595827 0.8001670602895073
+Epoch: 3
+Batch: 1900: Loss: 1.0616
+Batch: 2000: Loss: 1.0844
+Batch: 2100: Loss: 1.1362
+Batch: 2200: Loss: 1.1362
+Batch: 2300: Loss: 1.1437
+Batch: 2400: Loss: 1.1058
+Batch: 2500: Loss: 1.0858
+Batch: 2600: Loss: 1.1329
+Batch: 2700: Loss: 1.0965
+0.8001670602895073 0.8021357829881708
+Epoch: 4
+Batch: 2800: Loss: 1.1271
+Batch: 2900: Loss: 1.1088
+Batch: 3000: Loss: 1.1576
+Batch: 3100: Loss: 1.0919
+Batch: 3200: Loss: 1.1517
+Batch: 3300: Loss: 1.0922
+Batch: 3400: Loss: 1.1104
+Batch: 3500: Loss: 1.1247
+Batch: 3600: Loss: 1.0363
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 512, 512, 512]_3_0.005_Adam.pt
+0.8021357829881708 0.8016128568483074
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+ModuleList(
+  (0): Linear(in_features=501, out_features=512, bias=True)
+  (1): Linear(in_features=512, out_features=512, bias=True)
+  (2): Linear(in_features=512, out_features=512, bias=True)
+  (3): Linear(in_features=512, out_features=512, bias=True)
+  (4): Linear(in_features=512, out_features=5, bias=True)
+)
+Device: cpu
+Epoch: 1
+Batch: 0: Loss: 1.5949
+Batch: 100: Loss: 1.3509
+Batch: 200: Loss: 1.3723
+Batch: 300: Loss: 1.2515
+Batch: 400: Loss: 1.2271
+Batch: 500: Loss: 1.2468
+Batch: 600: Loss: 1.1856
+Batch: 700: Loss: 1.2118
+Batch: 800: Loss: 1.1738
+Batch: 900: Loss: 1.1791
+Epoch: 2
+Batch: 1000: Loss: 1.1945
+Batch: 1100: Loss: 1.2368
+Batch: 1200: Loss: 1.1705
+Batch: 1300: Loss: 1.1913
+Batch: 1400: Loss: 1.2064
+Batch: 1500: Loss: 1.2255
+Batch: 1600: Loss: 1.2165
+Batch: 1700: Loss: 1.1548
+Batch: 1800: Loss: 1.2140
+0.7847689315850689 0.7930026207721956
+Epoch: 3
+Batch: 1900: Loss: 1.1204
+Batch: 2000: Loss: 1.1550
+Batch: 2100: Loss: 1.1839
+Batch: 2200: Loss: 1.1686
+Batch: 2300: Loss: 1.2067
+Batch: 2400: Loss: 1.1594
+Batch: 2500: Loss: 1.1506
+Batch: 2600: Loss: 1.2071
+Batch: 2700: Loss: 1.1361
+0.7930026207721956 0.7957617103977299
+Epoch: 4
+Batch: 2800: Loss: 1.2032
+Batch: 2900: Loss: 1.1622
+Batch: 3000: Loss: 1.1943
+Batch: 3100: Loss: 1.1493
+Batch: 3200: Loss: 1.1952
+Batch: 3300: Loss: 1.1492
+Batch: 3400: Loss: 1.2134
+Batch: 3500: Loss: 1.1391
+Batch: 3600: Loss: 1.1061
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 512, 512, 512]_3_0.05_Adam.pt
+0.7957617103977299 0.7959173557051794
+Epoch: 5
+Batch: 3700: Loss: 1.1541
+Batch: 3800: Loss: 1.1449
+Batch: 3900: Loss: 1.1434
+Batch: 4000: Loss: 1.1491
+Batch: 4100: Loss: 1.1646
+Batch: 4200: Loss: 1.1772
+Batch: 4300: Loss: 1.2102
+Batch: 4400: Loss: 1.1572
+Batch: 4500: Loss: 1.1873
+Batch: 4600: Loss: 1.2089
+0.7959173557051794 0.7961588109638492
+Epoch: 6
+Batch: 4700: Loss: 1.1309
+Batch: 4800: Loss: 1.1957
+Batch: 4900: Loss: 1.1339
+Batch: 5000: Loss: 1.1684
+Batch: 5100: Loss: 1.1767
+Batch: 5200: Loss: 1.1274
+Batch: 5300: Loss: 1.1687
+Batch: 5400: Loss: 1.1413
+Batch: 5500: Loss: 1.1941
+0.7961588109638492 0.7975291961195703
+Epoch: 7
+Batch: 5600: Loss: 1.2264
+Batch: 5700: Loss: 1.1754
+Batch: 5800: Loss: 1.1300
+Batch: 5900: Loss: 1.1263
+Batch: 6000: Loss: 1.1400
+Batch: 6100: Loss: 1.1508
+Batch: 6200: Loss: 1.1290
+Batch: 6300: Loss: 1.1856
+Batch: 6400: Loss: 1.1261
+Model is saved as ./pointwise_ltr/models/pointwise_[512, 512, 512, 512]_6_0.05_Adam.pt
+0.7975291961195703 0.7948979920342779
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
