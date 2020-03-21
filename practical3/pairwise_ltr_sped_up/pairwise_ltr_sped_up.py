@@ -12,12 +12,15 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 sys.path.append('..')
 sys.path.append('.')
+import dataset
+import evaluate as evl
+
 
 
 class FastRankNet(nn.Module):
     """ Sped up Pairwise LTR model """
 
-    def __init__(self, input_dim,  n_hidden=256,  output_dim=1):
+    def __init__(self, input_dim=501, n_hidden=128, output_dim=1):
         """
         Initialize model
         input_dim: dimensionality of document feature vector
@@ -63,9 +66,9 @@ class FastRankNet(nn.Module):
         with torch.no_grad():
             test_scores = self.forward(
                 torch.Tensor(test_data.feature_matrix))
-            test_scores = test_scores.numpy().squeeze()
-            results = evl.evaluate(test_data, test_scores)
-        return results
+            test_scores_np = test_scores.numpy().squeeze()
+            results = evl.evaluate(test_data, test_scores_np)
+        return test_scores, results
 
 
 def weights_init(model):
@@ -149,7 +152,7 @@ def train(data, FLAGS):
 
 
 
-            if epoch % 1 == 0 and FLAGS.save:
+            if FLAGS.save:
                 filename_model = (
                     f"./pairwise_ltr_sped_up/models/pairwise_{n_hidden}_{epoch}_{FLAGS.learning_rate}.pt")
                 torch.save(model.state_dict(), filename_model)
@@ -178,7 +181,7 @@ def train(data, FLAGS):
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
         with open(filename_test_results, "w") as writer:
-            json.dump(model.evaluate_on_test(data), writer, indent=1)
+            json.dump(model.evaluate_on_test(data)[1], writer, indent=1)
         print(f"Results are saved in the json_files folder")
 
 
@@ -222,7 +225,7 @@ def plot_ARR_nDCG(results, figname):
 
     plt.title("nDCG and ARR for Sped-up RankNet")
     plt.tight_layout()
-    plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
+    plt.savefig(f"pairwise_ltr_sped_up/figures/ARR_NDCG_{figname}")
 
 
 def err(scores, test_labels):
@@ -231,7 +234,8 @@ def err(scores, test_labels):
 
     r = torch.arange(R.shape[0]) + 1
     denom = 2 ** 4
-    Ri = (2 ** R - 1) / denom
+    Ri = torch.Tensor((2 ** R - 1) / denom)
+
     prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
     err = torch.sum(Ri * prod / r)
 
@@ -240,9 +244,6 @@ def err(scores, test_labels):
 
 
 if __name__ == "__main__":
-    import dataset
-    import evaluate as evl
-
     np.random.seed(42)
     torch.manual_seed(42)
 
