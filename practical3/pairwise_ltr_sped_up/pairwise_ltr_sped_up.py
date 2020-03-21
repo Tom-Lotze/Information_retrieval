@@ -47,18 +47,11 @@ class FastRankNet(nn.Module):
 
         return s_i
 
-    def single_foward(self, x_batch):
-
-        h_i = self.fc1(x_batch)
-        s_i = self.fc2(h_i)
-
-        return s_i
-
     def evaluate_on_validation(self, data):
         """ evaluate on validation """
         valid_data = data.validation
         with torch.no_grad():
-            valid_scores = self.single_foward(
+            valid_scores = self.forward(
                 torch.Tensor(valid_data.feature_matrix))
             valid_scores = valid_scores.numpy().squeeze()
             results = evl.evaluate(valid_data, valid_scores)
@@ -68,7 +61,7 @@ class FastRankNet(nn.Module):
         """ Evaluate on test set """
         test_data = data.test
         with torch.no_grad():
-            test_scores = self.single_foward(
+            test_scores = self.forward(
                 torch.Tensor(test_data.feature_matrix))
             test_scores = test_scores.numpy().squeeze()
             results = evl.evaluate(test_data, test_scores)
@@ -230,6 +223,20 @@ def plot_ARR_nDCG(results, figname):
     plt.title("nDCG and ARR for Sped-up RankNet")
     plt.tight_layout()
     plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
+
+
+def err(scores, test_labels):
+
+    R = test_labels[scores.sort(descending=True, dim=0).indices]
+
+    r = torch.arange(R.shape[0]) + 1
+    denom = 2 ** 4
+    Ri = (2 ** R - 1) / denom
+    prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
+    err = torch.sum(Ri * prod / r)
+
+    return err
+
 
 
 if __name__ == "__main__":
