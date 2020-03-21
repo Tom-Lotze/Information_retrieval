@@ -55,7 +55,7 @@ class RankNet(nn.Module):
 
         return diff_mat
 
-    def single_foward(self, x_batch):
+    def single_forward(self, x_batch):
 
         h_i = self.sigmoid(self.fc1(x_batch))
         s_i = self.sigmoid(self.fc2(h_i))
@@ -66,7 +66,7 @@ class RankNet(nn.Module):
         """ evaluate on validation """
         valid_data = data.validation
         with torch.no_grad():
-            valid_scores = self.single_foward(
+            valid_scores = self.single_forward(
                 torch.Tensor(valid_data.feature_matrix))
             valid_scores = valid_scores.numpy().squeeze()
             results = evl.evaluate(valid_data, valid_scores)
@@ -76,32 +76,11 @@ class RankNet(nn.Module):
         """ Evaluate on test set """
         test_data = data.test
         with torch.no_grad():
-            test_scores = self.forward(
+            test_scores = self.single_forward(
                 torch.Tensor(test_data.feature_matrix))
             test_scores_np = test_scores.numpy().squeeze()
             results = evl.evaluate(test_data, test_scores_np)
         return test_scores, results
-    # def evaluate_on_test(self, data):
-    #     """ Evaluate on test set """
-    #     test_data = data.test
-    #     with torch.no_grad():
-    #         test_scores = self.single_foward(
-    #             torch.Tensor(test_data.feature_matrix))
-    #         test_scores = test_scores.numpy().squeeze()
-    #         results = evl.evaluate(test_data, test_scores)
-    #     return results
-    def err(scores, test_labels):
-
-        R = test_labels[scores.sort(descending=True, dim=0).indices]
-
-        r = torch.arange(R.shape[0]) + 1
-        denom = 2 ** 4
-        Ri = torch.Tensor((2 ** R - 1) / denom)
-
-        prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
-        err = torch.sum(Ri * prod / r)
-
-        return err
 
 
 def weights_init(model):
@@ -111,6 +90,18 @@ def weights_init(model):
         if model.bias is not None:
             torch.nn.init.zeros_(model.bias)
 
+def err(scores, test_labels):
+
+    R = test_labels[scores.sort(descending=True, dim=0).indices]
+
+    r = torch.arange(R.shape[0]) + 1
+    denom = 2 ** 4
+    Ri = torch.Tensor((2 ** R - 1) / denom)
+
+    prod = torch.cumprod(1 - Ri, dim=0) / (1-Ri)
+    err = torch.sum(Ri * prod / r)
+
+    return err
 
 
 def train(data, FLAGS):
