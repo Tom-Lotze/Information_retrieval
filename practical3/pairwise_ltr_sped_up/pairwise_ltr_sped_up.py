@@ -102,7 +102,7 @@ def train(data, FLAGS):
 
     # loss_function = nn.BCELoss(reduction='mean')
 
-    training_losses = []
+    # training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
 
@@ -122,52 +122,46 @@ def train(data, FLAGS):
 
                 optimizer.zero_grad()
 
+                num_docs = x_batch.shape[1]
+                num_pairs = num_docs * num_docs
+
                 # ignore batch if only one doc (no pairs)
-                if x_batch.shape[1] == 1:
+                if num_docs == 1:
                     continue
 
                 # squeeze batch
                 x_batch = x_batch.float().squeeze()
                 y_batch = y_batch.float().t()
 
+                # construct labels matrix
                 labels_mat = y_batch.t() - y_batch
-
                 labels_mat[labels_mat > 0] = 1
                 labels_mat[labels_mat == 0] = 0
                 labels_mat[labels_mat < 0] = -1
 
+                # perform forward pass and compute lambdas
                 scores = model(x_batch)
-
                 diff_mat = torch.sigmoid(torch.add(scores.t(), -scores))
 
-                # print(labels_mat)
-                lambda_ij = (
-                    1 * ((1/2) * (1 - labels_mat) - diff_mat))
-
+                lambda_ij = (1/2) * (1 - labels_mat) - diff_mat
                 lambda_i = lambda_ij.sum(dim=0)
 
-                loss = lambda_ij.mean()
-                # loss = loss_function(diff_scores, labels_mat)
+                # perform backward pass and correct for number of pairs
+                scores.squeeze().backward(lambda_i / num_pairs)
+                optimizer.step()
+                t.update()
 
+                overall_step += 1
+
+                # run on validations set
                 if overall_step % FLAGS.valid_each == 0:
                     model.eval()
                     valid_results = model.evaluate_on_validation(data)
                     validation_results[overall_step] = valid_results
                     ndcg_per_epoch[epoch][step] = valid_results['ndcg'][0]
-                    training_losses.append(loss.item())
-                    t.set_postfix_str(
-                        f'loss: {loss.mean().item():3f} ndcg: {valid_results["ndcg"][0]:3f}')
+                    t.set_postfix_str(f'ndcg: {valid_results["ndcg"][0]:3f}')
 
-                # backward pass
-                # loss.backward()
-                # lambda_ij.backward(torch.ones(lambda_ij.shape))
-                scores.squeeze().backward(lambda_i)
-                # optimizer step
-                optimizer.step()
 
-                t.update()
-
-                overall_step += 1
 
             if epoch % 1 == 0 and FLAGS.save:
                 filename_model = (
@@ -180,16 +174,15 @@ def train(data, FLAGS):
                 mean_prev_epoch = np.mean(
                     list(ndcg_per_epoch[epoch-1].values()))
                 mean_curr_epoch = np.mean(list(ndcg_per_epoch[epoch].values()))
-                # print(mean_prev_epoch, mean_curr_epoch)
                 if (mean_curr_epoch <= mean_prev_epoch +
                         FLAGS.early_stopping_threshold):
                     print("Early stopping condition satistied, "
                           "stopping training")
                     break
 
-    # save results
+    #save results
     if FLAGS.plot:
-        plot_loss_ndcg(validation_results, training_losses, figure_name)
+        plot_loss_ndcg(validation_results, figure_name)
 
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
@@ -199,26 +192,17 @@ def train(data, FLAGS):
         print(f"Results are saved in the json_files folder")
 
 
-def plot_loss_ndcg(ndcg, loss, figname):
+def plot_loss_ndcg(ndcg, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
-    fig, ax1 = plt.subplots()
-
+    plt.figure()
     color = 'tab:red'
-    ax1.set_xlabel('Batch (1 query per batch)')
-    ax1.set_ylabel('nDCG', color=color)
-    ax1.plot(x_labels, ndcg_values, color=color, label="nDCG")
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax1.legend(loc=0)
-
-    ax2 = ax1.twinx()
-
-    color = 'tab:blue'
-    ax2.set_ylabel('Training loss', color=color)
-    ax2.plot(x_labels, loss, color=color, label="Training loss")
-    ax2.tick_params(axis='y', labelcolor=color)
-    ax2.legend(loc=1)
+    plt.xlabel('Batch (1 query per batch)')
+    plt.ylabel('nDCG')
+    plt.plot(x_labels, ndcg_values, label="nDCG")
+    plt.tick_params(axis='y')
+    plt.legend()
 
     plt.title("nDCG and training loss for Sped up Pairwise LTR")
     plt.tight_layout()
@@ -233,7 +217,8 @@ if __name__ == "__main__":
 
     np.random.seed(42)
     torch.manual_seed(42)
-    # # load and read data
+
+    # load and read data
     data = dataset.get_dataset().get_data_folds()[0]
     data.read_data()
 
@@ -248,10 +233,10 @@ if __name__ == "__main__":
     parser.add_argument("--save", type=int, default=1,
                         help=("Either 1 or 0 (bool) to save"
                               " the model and results"))
-    parser.add_argument("--plot", type=int, default=0,
+    parser.add_argument("--plot", type=int, default=1,
                         help=("Either 1 or 0 (bool) to create a plot "
                               "of ndcg and loss"))
-    parser.add_argument("--valid_each", type=int, default=100,
+    parser.add_argument("--valid_each", type=int, default=30,
                         help=("Run the model on the validation "
                               "set every x steps"))
     parser.add_argument("--early_stopping_threshold", type=float, default=0.0,
