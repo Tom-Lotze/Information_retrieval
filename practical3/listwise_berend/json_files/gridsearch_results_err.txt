@@ -1,0 +1,166 @@
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_128_0_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_1_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_2_0.001_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_128_0_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_1_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_2_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_3_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_4_0.01_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_128_0_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_1_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_2_0.005_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_128_0_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_1_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_2_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_3_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_128_4_0.05_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_256_0_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_1_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_2_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_3_0.001_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_256_0_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_1_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_2_0.01_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_256_0_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_1_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_2_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_3_0.005_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_256_0_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_256_1_0.05_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_512_0_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_1_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_2_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_3_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_4_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_5_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_6_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_7_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_8_0.001_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_9_0.001_ERR.pt
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_512_0_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_1_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_2_0.01_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_3_0.01_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_512_0_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_1_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_2_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_3_0.005_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_4_0.005_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
+Number of features: 501
+Number of queries in training set: 19943
+Number of documents in training set: 473092
+Number of queries in validation set: 2993
+Number of documents in validation set: 71041
+Number of queries in test set: 6734
+Number of documents in test set: 163439
+Model is saved as ./listwise_berend/models/listwise_512_0_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_1_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_2_0.05_ERR.pt
+Model is saved as ./listwise_berend/models/listwise_512_3_0.05_ERR.pt
+Early stopping condition satistied, stopping training
+Results are saved in the json_files folder
