@@ -4,7 +4,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from torch.autograd import Variable
+# from torch.autograd import Variable
 import torch
 import argparse
 import json
@@ -52,8 +52,8 @@ class RankNet(nn.Module):
 
     def single_foward(self, x_batch):
 
-        h_i = self.fc1(x_batch)
-        s_i = self.fc2(h_i)
+        h_i = self.sigmoid(self.fc1(x_batch))
+        s_i = self.sigmoid(self.fc2(h_i))
 
         return s_i
 
@@ -101,7 +101,7 @@ def train(data, FLAGS):
 
     loss_function = nn.BCELoss(reduction='mean')
 
-    training_losses = []
+    # training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
 
@@ -144,7 +144,7 @@ def train(data, FLAGS):
                     valid_results = model.evaluate_on_validation(data)
                     validation_results[overall_step] = valid_results
                     ndcg_per_epoch[epoch][step] = valid_results['ndcg'][0]
-                    training_losses.append(loss.item())
+
                     t.set_postfix_str(
                         f'loss: {loss.mean().item():3f} ndcg: {valid_results["ndcg"][0]:3f}')
 
@@ -192,24 +192,15 @@ def plot_loss_ndcg(ndcg, loss, figname):
     ndcg_values = [i["ndcg"][0] for i in ndcg.values()]
     x_labels = list(ndcg.keys())
 
-    fig, ax1 = plt.subplots()
-
+    plt.figure()
     color = 'tab:red'
-    ax1.set_xlabel('Batch (1 query per batch)')
-    ax1.set_ylabel('nDCG', color=color)
-    ax1.plot(x_labels, ndcg_values, color=color, label="nDCG")
-    ax1.tick_params(axis='y', labelcolor=color)
-    ax1.legend(loc=0)
+    plt.xlabel('Batch (1 query per batch)')
+    plt.ylabel('nDCG')
+    plt.plot(x_labels, ndcg_values, label="nDCG")
+    plt.tick_params(axis='y')
+    plt.legend()
 
-    ax2 = ax1.twinx()
-
-    color = 'tab:blue'
-    ax2.set_ylabel('Training loss', color=color)
-    ax2.plot(x_labels, loss, color=color, label="Training loss")
-    ax2.tick_params(axis='y', labelcolor=color)
-    ax2.legend(loc=1)
-
-    plt.title("nDCG and training loss for Pairwise LTR")
+    plt.title("nDCG for Pairwise LTR")
     plt.tight_layout()
     plt.savefig(f"pairwise_ltr/figures/{figname}")
 
