@@ -42,13 +42,9 @@ class FastRankNet(nn.Module):
         - x: batch of document pairs B x (doc_i, doc_j)
         - out: batch of document scores: B x 1
         """
-
         h_i = self.sigmoid(self.fc1(x_batch))
         s_i = self.sigmoid(self.fc2(h_i))
 
-        # diff_mat = self.sigmoid(torch.add(s_i.t(), -s_i))
-
-        # return diff_mat
         return s_i
 
     def single_foward(self, x_batch):
@@ -100,15 +96,12 @@ def train(data, FLAGS):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=FLAGS.learning_rate)
 
-    # loss_function = nn.BCELoss(reduction='mean')
-
-    # training_losses = []
     validation_results = {}
     ndcg_per_epoch = {}
 
     filename_validation_results = f"./pairwise_ltr_sped_up/json_files/pairwise_{n_hidden}_{FLAGS.learning_rate}.json"
     filename_test_results = f"./pairwise_ltr_sped_up/json_files/pairwise_TEST_{n_hidden}_{FLAGS.learning_rate}.json"
-    figure_name = f"{n_hidden}_{FLAGS.learning_rate}.png"
+    figure_name = f"Sped_up_{n_hidden}_{FLAGS.learning_rate}.png"
 
     overall_step = 0
 
@@ -180,10 +173,14 @@ def train(data, FLAGS):
                           "stopping training")
                     break
 
-    #save results
-    if FLAGS.plot:
-        plot_loss_ndcg(validation_results, figure_name)
 
+    if FLAGS.plot:
+        plot_loss_ndcg(validation_results, "ARR_NDCG.png")
+
+    if FLAGS.plot_ARR_nDCG:
+        plot_ARR_nDCG(validation_results, figure_name)
+
+    #save results
     if FLAGS.save:
         with open(filename_validation_results, "w") as writer:
             json.dump(validation_results, writer, indent=1)
@@ -204,7 +201,33 @@ def plot_loss_ndcg(ndcg, figname):
     plt.tick_params(axis='y')
     plt.legend()
 
-    plt.title("nDCG and training loss for Sped up Pairwise LTR")
+    plt.title("nDCG for Sped-up Pairwise LTR")
+    plt.tight_layout()
+    plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
+
+def plot_ARR_nDCG(results, figname):
+    ndcg_values = [i["ndcg"][0] for i in results.values()]
+    ARR_values = [i["relevant rank"][0] for i in results.values()]
+    x_labels = list(results.keys())
+
+    fig, ax1 = plt.subplots()
+
+    color = 'tab:red'
+    ax1.set_xlabel('Batch (1 query per batch)')
+    ax1.set_ylabel('nDCG', color=color)
+    ax1.plot(x_labels, ndcg_values, color=color, label="nDCG")
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.legend(loc=0)
+
+    ax2 = ax1.twinx()
+
+    color = 'tab:blue'
+    ax2.set_ylabel('Average Relevant Rank', color=color)
+    ax2.plot(x_labels, ARR_values, color=color, label="ARR")
+    ax2.tick_params(axis='y', labelcolor=color)
+    ax2.legend(loc=0)
+
+    plt.title("nDCG and ARR for Sped-up RankNet")
     plt.tight_layout()
     plt.savefig(f"pairwise_ltr_sped_up/figures/{figname}")
 
@@ -223,11 +246,11 @@ if __name__ == "__main__":
     data.read_data()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hidden_units', type=int, default=256,
+    parser.add_argument('--hidden_units', type=int, default=128,
                         help=('Integer specifying number of hidden units in '
                               'hidden layer'))
     parser.add_argument('--learning_rate', type=float,
-                        default=0.001, help='Learning rate')
+                        default=0.005, help='Learning rate')
     parser.add_argument('--max_epochs', type=int,
                         default=10, help='Max number of epochs')
     parser.add_argument("--save", type=int, default=1,
@@ -236,7 +259,7 @@ if __name__ == "__main__":
     parser.add_argument("--plot", type=int, default=1,
                         help=("Either 1 or 0 (bool) to create a plot "
                               "of ndcg and loss"))
-    parser.add_argument("--valid_each", type=int, default=30,
+    parser.add_argument("--valid_each", type=int, default=100,
                         help=("Run the model on the validation "
                               "set every x steps"))
     parser.add_argument("--early_stopping_threshold", type=float, default=0.0,
@@ -245,12 +268,14 @@ if __name__ == "__main__":
     parser.add_argument("--save_pred", type=int, default=0,
                         help=("Boolean (0, 1) whether to save the "
                               "predictions on the test set"))
+    parser.add_argument("--plot_ARR_nDCG", type=int, default=0, help = ("Boolean on whteher to plot the ARR and relevant rank seperately") )
 
     # set configuration in FLAGS parameter
     FLAGS, unparsed = parser.parse_known_args()
     FLAGS.save = bool(FLAGS.save)
     FLAGS.plot = bool(FLAGS.plot)
     FLAGS.save_pred = bool(FLAGS.save_pred)
+    FLAGS.plot_ARR_nDCG = bool(FLAGS.plot_ARR_nDCG)
 
     # # print data stats
     print('Number of features: %d' % data.num_features)
