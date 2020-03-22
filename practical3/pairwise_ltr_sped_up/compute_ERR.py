@@ -36,4 +36,4 @@ for qid in tqdm(np.arange(data.test.num_queries())):
         ERR_scores.append(ERR_query)
 
 
-print(f"Mean: {np.mean(ERR_scores):.4f}\nSTD: {np.std(ERR_scores):.4f}\nnr queries tested: {len(ERR_scores)}")
+print(f"Mean: {np.mean(ERR_scores):.4f}\nSTD: {np.std(ERR_scores):.4f}\nnr queries tested: {len(ERR_scores)},\nMin: {min(ERR_scores)}\nMax {max(ERR_scores)}")
