@@ -22,7 +22,7 @@ import evaluate as evl
 class RankNet(nn.Module):
     """ Pairwise LTR model """
 
-    def __init__(self, input_dim,  n_hidden=256,  output_dim=1):
+    def __init__(self, input_dim,  n_hidden=128,  output_dim=1):
         """
         Initialize model
         input_dim: dimensionality of document feature vector
@@ -243,7 +243,7 @@ if __name__ == "__main__":
                         help=('Integer specifying number of hidden units in '
                               'hidden layer'))
     parser.add_argument('--learning_rate', type=float,
-                        default=0.001, help='Learning rate')
+                        default=0.005, help='Learning rate')
     parser.add_argument('--max_epochs', type=int,
                         default=10, help='Max number of epochs')
     parser.add_argument("--save", type=int, default=1,
